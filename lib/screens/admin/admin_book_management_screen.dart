@@ -880,6 +880,7 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
+                              isExpanded: true,
                               value: _selectedPublisher,
                               isDense: true,
                               decoration: InputDecoration(
@@ -904,7 +905,8 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                               items: [
                                 const DropdownMenuItem<String>(
                                   value: null,
-                                  child: Text('Semua Penerbit'),
+                                  child: Text('Semua Penerbit',
+                                      overflow: TextOverflow.ellipsis),
                                 ),
                                 ..._publishers.map((publisher) {
                                   return DropdownMenuItem<String>(
@@ -922,9 +924,10 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                               },
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: DropdownButtonFormField<int>(
+                              isExpanded: true,
                               value: _selectedYear,
                               isDense: true,
                               decoration: InputDecoration(
@@ -936,25 +939,27 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                                     : Colors.white,
                                 prefixIcon: Icon(
                                   Icons.calendar_today,
-                                  size: 18,
+                                  size: 12,
                                   color: _selectedYear != null
                                       ? Colors.blue
                                       : Colors.grey,
                                 ),
                                 contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
+                                  horizontal: 10,
+                                  vertical: 6,
                                 ),
                               ),
                               items: [
                                 const DropdownMenuItem<int>(
                                   value: null,
-                                  child: Text('Semua Tahun'),
+                                  child: Text('Semua Tahun',
+                                      overflow: TextOverflow.ellipsis),
                                 ),
                                 ..._years.map((year) {
                                   return DropdownMenuItem<int>(
                                     value: year,
-                                    child: Text(year.toString()),
+                                    child: Text(year.toString(),
+                                        overflow: TextOverflow.ellipsis),
                                   );
                                 }).toList(),
                               ],
@@ -966,7 +971,7 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
 
                       // Row 3: Status Filter (full width)
                       DropdownButtonFormField<String>(
@@ -982,15 +987,15 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                               : Colors.white,
                           prefixIcon: Icon(
                             Icons.inventory,
-                            size: 18,
+                            size: 12,
                             color: (_selectedStatus != null &&
                                     _selectedStatus != 'Semua')
                                 ? Colors.blue
                                 : Colors.grey,
                           ),
                           contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
+                            horizontal: 10,
+                            vertical: 6,
                           ),
                         ),
                         items: _statusOptions.map((status) {
@@ -1029,6 +1034,7 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
+                              isExpanded: true,
                               value: _sortBy,
                               decoration: InputDecoration(
                                 labelText: 'Urutkan berdasarkan',
@@ -1071,7 +1077,12 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                                     children: [
                                       Icon(iconData, size: 16),
                                       const SizedBox(width: 8),
-                                      Text(displayText),
+                                      Expanded(
+                                        child: Text(
+                                          displayText,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 );
@@ -1085,6 +1096,7 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: DropdownButtonFormField<String>(
+                              isExpanded: true,
                               value: _sortOrder,
                               decoration: InputDecoration(
                                 labelText: 'Urutan',
@@ -1114,9 +1126,14 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                                         size: 16,
                                       ),
                                       const SizedBox(width: 8),
-                                      Text(option == 'asc'
-                                          ? 'A-Z (Naik)'
-                                          : 'Z-A (Turun)'),
+                                      Expanded(
+                                        child: Text(
+                                          option == 'asc'
+                                              ? 'A-Z (Naik)'
+                                              : 'Z-A (Turun)',
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 );

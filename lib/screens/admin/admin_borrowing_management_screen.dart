@@ -517,9 +517,14 @@ class _AdminBorrowingManagementScreenState
                 ),
               ),
 
-              // Page numbers
-              Row(
-                children: _buildPageNumbers(),
+              // Page numbers (scrollable)
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _buildPageNumbers(),
+                  ),
+                ),
               ),
 
               // Next button

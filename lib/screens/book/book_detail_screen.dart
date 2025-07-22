@@ -151,14 +151,18 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                   overflow: TextOverflow.visible,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'oleh ${book.pengarang}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey,
-                  ),
-                  overflow: TextOverflow.visible,
+                Row(
+                  children: [
+                    const Text('Pengarang:'),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        book.pengarang,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
                 ),
                 const Divider(height: 40, thickness: 1),
                 _buildDetailRow('Penerbit', book.penerbit),

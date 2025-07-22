@@ -28,10 +28,13 @@ class _BookFormScreenState extends State<BookFormScreen> {
   void initState() {
     super.initState();
     _judulController = TextEditingController(text: widget.book?.judul ?? '');
-    _pengarangController = TextEditingController(text: widget.book?.pengarang ?? '');
-    _penerbitController = TextEditingController(text: widget.book?.penerbit ?? '');
+    _pengarangController =
+        TextEditingController(text: widget.book?.pengarang ?? '');
+    _penerbitController =
+        TextEditingController(text: widget.book?.penerbit ?? '');
     _tahunController = TextEditingController(text: widget.book?.tahun ?? '');
-    _stokController = TextEditingController(text: widget.book?.stok.toString() ?? '');
+    _stokController =
+        TextEditingController(text: widget.book?.stok.toString() ?? '');
     _selectedCategoryId = widget.book?.category.id;
     _categoriesFuture = _apiService.getCategories();
   }
@@ -48,7 +51,7 @@ class _BookFormScreenState extends State<BookFormScreen> {
         'tahun': _tahunController.text,
         'stok': _stokController.text,
       };
-      
+
       bool success;
       if (widget.book == null) {
         success = await _apiService.addBook(bookData);
@@ -61,16 +64,13 @@ class _BookFormScreenState extends State<BookFormScreen> {
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Data berhasil disimpan!'))
-          );
-          
-          // BARIS INI SANGAT PENTING: Mengirim kabar 'true' saat kembali
-          Navigator.pop(context, true); 
+              const SnackBar(content: Text('Data berhasil disimpan!')));
 
+          // BARIS INI SANGAT PENTING: Mengirim kabar 'true' saat kembali
+          Navigator.pop(context, true);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Gagal menyimpan data!'))
-          );
+              const SnackBar(content: Text('Gagal menyimpan data!')));
         }
       }
     }
@@ -79,7 +79,8 @@ class _BookFormScreenState extends State<BookFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.book == null ? 'Tambah Buku Baru' : 'Edit Buku')),
+      appBar: AppBar(
+          title: Text(widget.book == null ? 'Tambah Buku Baru' : 'Edit Buku')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -88,15 +89,46 @@ class _BookFormScreenState extends State<BookFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                TextFormField(controller: _judulController, decoration: const InputDecoration(labelText: 'Judul Buku'), validator: (v) => v!.isEmpty ? 'Judul tidak boleh kosong' : null),
+                Row(
+                  children: [
+                    const Text('Judul:'),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        widget.book?.judul ?? '',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
-                TextFormField(controller: _pengarangController, decoration: const InputDecoration(labelText: 'Pengarang'), validator: (v) => v!.isEmpty ? 'Pengarang tidak boleh kosong' : null),
+                TextFormField(
+                    controller: _pengarangController,
+                    decoration: const InputDecoration(labelText: 'Pengarang'),
+                    validator: (v) =>
+                        v!.isEmpty ? 'Pengarang tidak boleh kosong' : null),
                 const SizedBox(height: 16),
-                TextFormField(controller: _penerbitController, decoration: const InputDecoration(labelText: 'Penerbit'), validator: (v) => v!.isEmpty ? 'Penerbit tidak boleh kosong' : null),
+                TextFormField(
+                    controller: _penerbitController,
+                    decoration: const InputDecoration(labelText: 'Penerbit'),
+                    validator: (v) =>
+                        v!.isEmpty ? 'Penerbit tidak boleh kosong' : null),
                 const SizedBox(height: 16),
-                TextFormField(controller: _tahunController, decoration: const InputDecoration(labelText: 'Tahun Terbit'), keyboardType: TextInputType.number, validator: (v) => v!.isEmpty ? 'Tahun tidak boleh kosong' : null),
+                TextFormField(
+                    controller: _tahunController,
+                    decoration:
+                        const InputDecoration(labelText: 'Tahun Terbit'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) =>
+                        v!.isEmpty ? 'Tahun tidak boleh kosong' : null),
                 const SizedBox(height: 16),
-                TextFormField(controller: _stokController, decoration: const InputDecoration(labelText: 'Stok'), keyboardType: TextInputType.number, validator: (v) => v!.isEmpty ? 'Stok tidak boleh kosong' : null),
+                TextFormField(
+                    controller: _stokController,
+                    decoration: const InputDecoration(labelText: 'Stok'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) =>
+                        v!.isEmpty ? 'Stok tidak boleh kosong' : null),
                 const SizedBox(height: 16),
                 FutureBuilder<List<Category>>(
                   future: _categoriesFuture,
@@ -111,16 +143,22 @@ class _BookFormScreenState extends State<BookFormScreen> {
                       value: _selectedCategoryId,
                       decoration: const InputDecoration(labelText: 'Kategori'),
                       hint: const Text('Pilih Kategori'),
-                      items: snapshot.data!.map((category) => DropdownMenuItem<int>(value: category.id, child: Text(category.name))).toList(),
-                      onChanged: (value) => setState(() => _selectedCategoryId = value),
-                      validator: (value) => value == null ? 'Pilih kategori' : null,
+                      items: snapshot.data!
+                          .map((category) => DropdownMenuItem<int>(
+                              value: category.id, child: Text(category.name)))
+                          .toList(),
+                      onChanged: (value) =>
+                          setState(() => _selectedCategoryId = value),
+                      validator: (value) =>
+                          value == null ? 'Pilih kategori' : null,
                     );
                   },
                 ),
                 const SizedBox(height: 24),
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(onPressed: _submitForm, child: const Text('SIMPAN')),
+                    : ElevatedButton(
+                        onPressed: _submitForm, child: const Text('SIMPAN')),
               ],
             ),
           ),

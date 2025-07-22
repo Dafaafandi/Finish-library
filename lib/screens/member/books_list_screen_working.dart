@@ -342,7 +342,7 @@ class _MemberBooksListScreenState extends State<MemberBooksListScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 4,
-      shadowColor: Colors.black.withValues(alpha: 0.1),
+      shadowColor: Colors.black.withAlpha(25),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -396,88 +396,81 @@ class _MemberBooksListScreenState extends State<MemberBooksListScreen> {
               const SizedBox(width: 16),
               // Book Info
               Expanded(
-                child: SizedBox(
-                  height: 120,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            book.judul,
-                            style: const TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text('oleh ${book.pengarang}',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      book.judul,
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text('oleh ${book.pengarang}',
+                        style: TextStyle(
+                            color: Colors.grey.shade600, fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                    Text(book.penerbit,
+                        style: TextStyle(
+                            color: Colors.grey.shade600, fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                    Text('Tahun: ${book.tahun}',
+                        style: TextStyle(
+                            color: Colors.grey.shade600, fontSize: 12)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: book.stok > 0
+                                  ? Colors.green.shade100
+                                  : Colors.red.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              book.stok > 0 ? 'Stok: ${book.stok}' : 'Habis',
                               style: TextStyle(
-                                  color: Colors.grey.shade600, fontSize: 13),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
-                          Text(book.penerbit,
-                              style: TextStyle(
-                                  color: Colors.grey.shade600, fontSize: 12),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
-                          Text('Tahun: ${book.tahun}',
-                              style: TextStyle(
-                                  color: Colors.grey.shade600, fontSize: 12)),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
                                 color: book.stok > 0
-                                    ? Colors.green.shade100
-                                    : Colors.red.shade100,
-                                borderRadius: BorderRadius.circular(12),
+                                    ? Colors.green.shade800
+                                    : Colors.red.shade800,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
-                              child: Text(
-                                book.stok > 0 ? 'Stok: ${book.stok}' : 'Habis',
-                                style: TextStyle(
-                                  color: book.stok > 0
-                                      ? Colors.green.shade800
-                                      : Colors.red.shade800,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          if (book.stok > 0)
-                            Flexible(
-                              child: ElevatedButton(
-                                onPressed: () => _showBorrowDialog(book),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue.shade600,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8)),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  minimumSize: const Size(0, 32),
-                                ),
-                                child: const Text(
-                                  'Pinjam',
-                                  style: TextStyle(fontSize: 12),
-                                ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (book.stok > 0)
+                          Flexible(
+                            child: ElevatedButton(
+                              onPressed: () => _showBorrowDialog(book),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue.shade600,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                minimumSize: const Size(0, 32),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                            )
-                        ],
-                      ),
-                    ],
-                  ),
+                              child: const Text(
+                                'Pinjam',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ),
+                          )
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
