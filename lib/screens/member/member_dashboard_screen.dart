@@ -388,8 +388,6 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
                             Icons.history,
                             Colors.green.shade700,
                             () async {
-                              // 1. Jadikan fungsi ini async
-                              // 2. Tunggu hasil dari BorrowedBooksScreen
                               final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -397,8 +395,6 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
                                       const BorrowedBooksScreen(),
                                 ),
                               );
-
-                              // 3. Jika hasilnya adalah 'true' (artinya ada perubahan), muat ulang data.
                               if (result == true) {
                                 _loadMemberData();
                               }

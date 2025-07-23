@@ -17,6 +17,7 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
   bool _isLoading = false;
   String _filterStatus = 'semua'; // semua, dipinjam, dikembalikan, terlambat
   int? _currentMemberId;
+  bool _dataHasChanged = false; // <-- TAMBAHKAN BARIS INI
 
   @override
   void initState() {
@@ -428,6 +429,9 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
       if (mounted) {
         if (success) {
           ErrorHandler.showSuccess(context, 'Buku berhasil dikembalikan');
+          setState(() {
+            _dataHasChanged = true;
+          });
           await _loadBorrowings();
 
           // RESTORE the original due date after API call corrupts it
@@ -528,6 +532,12 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
         title: const Text('Buku Dipinjam'),
         backgroundColor: Colors.blue.shade600,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, _dataHasChanged);
+          },
+        ),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.filter_list),
