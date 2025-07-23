@@ -16,6 +16,7 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
   Map<String, dynamic> _stats = {};
   bool _isLoading = true;
   String? _userName;
+  String? _userRole;
   int? _currentMemberId;
 
   @override
@@ -28,41 +29,44 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Get current user info
       final userName = await _apiService.getUserName();
-      int? userId = await _apiService.getUserId();
+      final userRole =
+          await _apiService.getUserRole(); // Pastikan ada method ini
+      Map<String, dynamic> stats = {};
 
-      // If user ID not found, try from profile
-      if (userId == null) {
-        final profile = await _apiService.getUserProfile();
-        if (profile != null && profile['id'] != null) {
-          userId = profile['id'];
-        }
-      }
+      if (userRole == 'member') {
+        // Ambil data peminjaman member saja
+        final currentMemberId = await _apiService.getCurrentMemberId();
+        final allBorrowings = await _apiService.getAllBorrowings();
+        final memberBorrowings = allBorrowings
+            .where((b) => b['id_member'] == currentMemberId)
+            .toList();
 
-      if (userId != null) {
-        _currentMemberId = userId;
+        int totalBorrowed = memberBorrowings.length;
+        int returned = memberBorrowings.where((b) {
+          final status = b['status']?.toString();
+          final tglKembali = b['tanggal_pengembalian'];
+          return status == "3" || (tglKembali != null && tglKembali.toString().isNotEmpty && status != "1");
+        }).length;
+
+        stats = {
+          'total_borrowed': totalBorrowed,
+          'returned': returned,
+        };
       } else {
-        // Show login error instead of fallback
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Sesi login tidak valid. Silakan logout dan login kembali.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        _currentMemberId = null;
-        setState(() => _isLoading = false);
-        return;
+        // Admin: tampilkan statistik global
+        final dashboardStats = await _apiService.getMemberDashboardStats();
+        final dashboard = dashboardStats['data']?['dashboard'] ?? {};
+        stats = {
+          'total_borrowed': dashboard['totalDipinjam'] ?? 0,
+          'returned': dashboard['totalDikembalikan'] ?? 0,
+        };
       }
-
-      // Get member borrowing statistics
-      await _calculateMemberStats();
 
       setState(() {
         _userName = userName;
+        _userRole = userRole;
+        _stats = stats;
         _isLoading = false;
       });
     } catch (e) {
@@ -113,76 +117,43 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
       int overdue = 0;
 
       for (var borrowing in memberBorrowings) {
-        // Check all available fields for returned status
         final status = borrowing['status'];
         final statusStr = status?.toString() ?? '';
         final returnedDate = borrowing['tanggal_pengembalian_aktual'];
         final updateDate = borrowing['updated_at'];
         final returnDate = borrowing['tanggal_pengembalian'];
 
-        // Debug: Print borrowing details
-        print(
-            'ID: ${borrowing['id']}, Status: $statusStr, ActualReturn: $returnedDate, Updated: $updateDate, ReturnDate: $returnDate');
-
-        // Enhanced logic: Check multiple indicators for returned status
         bool isReturned = false;
         bool isOverdue = false;
 
-        // Method 1: Status is explicitly "2" (dikembalikan)
         if (statusStr == "2") {
           isReturned = true;
-        }
-        // Method 2: Has actual return date (tanggal_pengembalian_aktual)
-        else if (returnedDate != null && returnedDate.toString().isNotEmpty) {
+        } else if (returnedDate != null && returnedDate.toString().isNotEmpty) {
           isReturned = true;
-        }
-        // Method 3: For status "3", determine if it's returned or actually overdue
-        else if (statusStr == "3") {
+        } else if (statusStr == "3") {
           try {
             final borrowDate = DateTime.parse(borrowing['tanggal_peminjaman']);
             final dueDate = DateTime.parse(returnDate);
             final updated = DateTime.parse(updateDate);
             final now = DateTime.now();
-
-            // Check if the book has been returned (updated recently and return date is set)
-            // When a book is returned, API sets status to 3 and updates tanggal_pengembalian to actual return date
             bool wasReturnedToday = updated.year == now.year &&
                 updated.month == now.month &&
                 updated.day == now.day;
 
-            // Calculate the original due date (borrowed date + typical loan period of 7-8 days)
             final estimatedDueDate = borrowDate.add(const Duration(days: 8));
-            print(
-                'ESTIMATED due date for returned book: ${estimatedDueDate.toString().substring(0, 10)} (pinjam: ${borrowDate.toString().substring(0, 10)} + 8 days)');
 
-            // If tanggal_pengembalian matches today's date and book was updated today,
-            // it's likely a returned book (not overdue)
             if (wasReturnedToday &&
                 returnDate == now.toString().substring(0, 10)) {
               isReturned = true;
-              print(
-                  'Book ${borrowing['id']} marked as RETURNED (returned today)');
-            }
-            // If the return date is before or equal to the estimated due date, it's returned on time
-            else if (DateTime.parse(returnDate).isBefore(estimatedDueDate) ||
+            } else if (DateTime.parse(returnDate).isBefore(estimatedDueDate) ||
                 DateTime.parse(returnDate).isAtSameMomentAs(estimatedDueDate)) {
               isReturned = true;
-              print(
-                  'Book ${borrowing['id']} marked as RETURNED (returned on time)');
-            }
-            // Otherwise, check if it's actually overdue
-            else if (now.isAfter(dueDate)) {
+            } else if (now.isAfter(dueDate)) {
               isOverdue = true;
-              print('Book ${borrowing['id']} marked as OVERDUE');
             } else {
-              // Default case for status 3 - treat as returned to be safe
               isReturned = true;
-              print(
-                  'Book ${borrowing['id']} marked as RETURNED (default for status 3)');
             }
           } catch (e) {
-            // Date parsing failed, assume it's returned to avoid false overdue counts
-            print('Date parsing failed for borrowing ${borrowing['id']}: $e');
             isReturned = true;
           }
         }
@@ -358,40 +329,31 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 1.4,
-                      children: [
-                        _buildStatCard(
-                          'Total Dipinjam',
-                          _stats['total_borrowed']?.toString() ?? '0',
-                          Icons.library_books,
-                          Colors.blue,
-                        ),
-                        _buildStatCard(
-                          'Sedang Dipinjam',
-                          _stats['currently_borrowed']?.toString() ?? '0',
-                          Icons.book,
-                          Colors.orange,
-                        ),
-                        _buildStatCard(
-                          'Sudah Dikembalikan',
-                          _stats['returned']?.toString() ?? '0',
-                          Icons.assignment_return,
-                          Colors.green,
-                        ),
-                        _buildStatCard(
-                          'Terlambat',
-                          _stats['overdue']?.toString() ?? '0',
-                          Icons.warning,
-                          Colors.red,
-                        ),
-                      ],
-                    ),
+                    if (_userRole == 'member') ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatCard(
+                              'Total Dipinjam',
+                              _stats['total_borrowed']?.toString() ?? '0',
+                              Icons.library_books,
+                              Colors.blue,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildStatCard(
+                              'Sudah Dikembalikan',
+                              _stats['returned']?.toString() ?? '0',
+                              Icons.assignment_return,
+                              Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      // Tampilkan statistik global untuk admin
+                    ],
 
                     const SizedBox(height: 24),
 
@@ -412,7 +374,7 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
                           child: _buildActionCard(
                             'Cari Buku',
                             Icons.search,
-                            Colors.blue,
+                            Colors.blue.shade700,
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -426,7 +388,7 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
                           child: _buildActionCard(
                             'Riwayat Peminjaman',
                             Icons.history,
-                            Colors.green,
+                            Colors.green.shade700,
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -446,14 +408,16 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
     );
   }
 
+  // Ganti _buildStatCard dan _buildActionCard agar lebih modern:
   Widget _buildStatCard(
       String title, String value, IconData icon, Color color) {
     return Card(
-      elevation: 3,
+      elevation: 1.5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(18),
           color: Colors.white,
         ),
         child: Column(
@@ -461,26 +425,26 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
           children: [
             Icon(
               icon,
-              size: 24,
+              size: 32,
               color: color,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               value,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 11,
+                fontSize: 13,
                 color: Colors.black54,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -494,27 +458,28 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
   Widget _buildActionCard(
       String title, IconData icon, Color color, VoidCallback onTap) {
     return Card(
-      elevation: 2,
+      elevation: 1.5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(vertical: 22),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 icon,
-                size: 28,
+                size: 34,
                 color: color,
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 10),
               Text(
                 title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                   color: color,
                 ),
                 maxLines: 2,

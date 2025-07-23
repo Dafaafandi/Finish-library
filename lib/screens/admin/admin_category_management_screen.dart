@@ -222,7 +222,6 @@ class _AdminCategoryManagementScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manajemen Kategori'),
-        backgroundColor: Colors.red.shade600,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -231,6 +230,18 @@ class _AdminCategoryManagementScreenState
             tooltip: 'Tambah Kategori',
           ),
         ],
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.indigo.shade400,
+                Colors.indigo.shade600,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -374,50 +385,52 @@ class _AdminCategoryManagementScreenState
 
           // Categories List
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _categories.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Tidak ada kategori ditemukan',
-                          style: TextStyle(fontSize: 16),
+            child: RefreshIndicator(
+              onRefresh: () => _loadCategories(resetPage: true),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _categories.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Tidak ada kategori ditemukan',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _categories.length,
+                          itemBuilder: (context, index) {
+                            final category = _categories[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              child: ListTile(
+                                title: Text(
+                                  category.name,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Text('ID: ${category.id}'),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          color: Colors.blue),
+                                      onPressed: () =>
+                                          _showEditCategoryDialog(category),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          color: Colors.red),
+                                      onPressed: () => _deleteCategory(category),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      )
-                    : ListView.builder(
-                        itemCount: _categories.length,
-                        itemBuilder: (context, index) {
-                          final category = _categories[index];
-
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            child: ListTile(
-                              title: Text(
-                                category.name,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text('ID: ${category.id}'),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit,
-                                        color: Colors.blue),
-                                    onPressed: () =>
-                                        _showEditCategoryDialog(category),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete,
-                                        color: Colors.red),
-                                    onPressed: () => _deleteCategory(category),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+            ),
           ),
 
           // Pagination Controls

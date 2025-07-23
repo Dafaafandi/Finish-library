@@ -795,7 +795,7 @@ class ApiService {
     try {
       if (kDebugMode) {}
 
-      // Since the API endpoint '/category/all/all' doesn't seem to support
+      // Since the API endpoint '/category/all' doesn't seem to support
       // server-side filtering and pagination, we'll use client-side approach
       try {
         final allCategories = await getCategories();
@@ -2853,6 +2853,14 @@ class ApiService {
       if (kDebugMode) {}
       return [];
     }
+  }
+
+  Future<Map<String, dynamic>> getDashboardData() async {
+    final response = await _dio.get('/book/dashboard');
+    if (response.statusCode == 200 && response.data['data'] != null) {
+      return response.data['data'] as Map<String, dynamic>;
+    }
+    throw Exception('Gagal mengambil data dashboard');
   }
 
   // Search categories with advanced options

@@ -98,9 +98,7 @@ class LibraryApiService {
               final userId = data['user']['id'];
               if (userId != null) {
                 await prefs.setInt('user_id', userId);
-                if (kDebugMode) {
-
-                }
+                if (kDebugMode) {}
               }
 
               await prefs.setString(
@@ -118,9 +116,7 @@ class LibraryApiService {
                   }
                 }
                 await prefs.setString('user_role', userRole);
-                if (kDebugMode) {
-
-                }
+                if (kDebugMode) {}
               } else {
                 await prefs.setString('user_role', 'member');
               }
@@ -133,9 +129,7 @@ class LibraryApiService {
 
       return false;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
 
       // Check for specific API error responses
       if (e.response?.data != null && e.response?.data['message'] != null) {
@@ -152,9 +146,7 @@ class LibraryApiService {
 
       return false;
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       throw Exception('Terjadi kesalahan yang tidak terduga');
     }
   }
@@ -173,9 +165,7 @@ class LibraryApiService {
 
       return response.statusCode == 200 || response.statusCode == 201;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -203,9 +193,7 @@ class LibraryApiService {
 
       return [];
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       throw Exception('Gagal mengambil data buku');
     }
   }
@@ -227,9 +215,7 @@ class LibraryApiService {
 
       throw Exception('Struktur data tidak valid');
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       throw Exception('Gagal mengambil detail buku');
     }
   }
@@ -248,9 +234,7 @@ class LibraryApiService {
 
       return response.statusCode == 200;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -260,9 +244,7 @@ class LibraryApiService {
       final response = await _dio.delete('/book/$id/delete');
       return response.statusCode == 200;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -281,14 +263,10 @@ class LibraryApiService {
 
       return response.statusCode == 201 || response.statusCode == 200;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -319,9 +297,7 @@ class LibraryApiService {
 
       return [];
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       throw Exception('Gagal mengambil data kategori');
     }
   }
@@ -343,9 +319,7 @@ class LibraryApiService {
 
       throw Exception('Struktur data tidak valid');
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       throw Exception('Gagal mengambil detail kategori');
     }
   }
@@ -366,9 +340,7 @@ class LibraryApiService {
 
       return response.statusCode == 200;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -378,9 +350,7 @@ class LibraryApiService {
       final response = await _dio.delete('/category/$id/delete');
       return response.statusCode == 200;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -401,14 +371,10 @@ class LibraryApiService {
 
       return response.statusCode == 200 || response.statusCode == 201;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -419,16 +385,12 @@ class LibraryApiService {
     try {
       // Try using the same endpoint as admin first for consistency
       try {
-        if (kDebugMode) {
-
-        }
+        if (kDebugMode) {}
 
         final response = await _dio.get('/peminjaman/all');
         final responseData = response.data;
 
-        if (kDebugMode) {
-
-        }
+        if (kDebugMode) {}
 
         if (responseData is Map<String, dynamic> &&
             responseData['status'] == 200 &&
@@ -445,15 +407,11 @@ class LibraryApiService {
           return allBorrowings;
         }
       } catch (e) {
-        if (kDebugMode) {
-
-        }
+        if (kDebugMode) {}
       }
 
       // Fallback to paginated endpoint if /all fails
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
 
       List<dynamic> allBorrowings = [];
       int currentPage = 1;
@@ -482,7 +440,6 @@ class LibraryApiService {
 
           // Safety check to prevent infinite loops
           if (currentPage > 100) {
-            
             break;
           }
         } else if (responseData is Map<String, dynamic> &&
@@ -497,20 +454,15 @@ class LibraryApiService {
           allBorrowings.addAll(responseData['data']['data']);
           hasMorePages = false;
         } else {
-          
           hasMorePages = false;
         }
       }
 
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
 
       return allBorrowings;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       throw Exception('Gagal mengambil data peminjaman');
     }
   }
@@ -530,9 +482,7 @@ class LibraryApiService {
 
       return null;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return null;
     }
   }
@@ -555,9 +505,7 @@ class LibraryApiService {
 
       return response.statusCode == 200 || response.statusCode == 201;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -568,21 +516,15 @@ class LibraryApiService {
       // Gunakan endpoint return yang benar untuk mengembalikan stok buku
       final response = await _dio.post('/peminjaman/book/$peminjamanId/return');
 
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
 
       // Endpoint return yang benar akan mengembalikan stok buku
       return response.statusCode == 200;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -597,9 +539,7 @@ class LibraryApiService {
       }
       return null;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return null;
     }
   }
@@ -613,9 +553,7 @@ class LibraryApiService {
       }
       return null;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return null;
     }
   }
@@ -629,9 +567,7 @@ class LibraryApiService {
       }
       return null;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return null;
     }
   }
@@ -654,9 +590,7 @@ class LibraryApiService {
 
       return response.statusCode == 200 || response.statusCode == 201;
     } on DioException catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -678,9 +612,7 @@ class LibraryApiService {
       }
       return null;
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return null;
     }
   }
@@ -690,9 +622,7 @@ class LibraryApiService {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getString('user_name');
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return null;
     }
   }
@@ -702,9 +632,7 @@ class LibraryApiService {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getInt('user_id');
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return null;
     }
   }
@@ -714,13 +642,9 @@ class LibraryApiService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('user_id', id);
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
     }
   }
 
@@ -744,10 +668,31 @@ class LibraryApiService {
       'isAuthenticated': token != null && token.isNotEmpty && userId != null,
     };
 
-    if (kDebugMode) {
-
-    }
+    if (kDebugMode) {}
 
     return status;
+  }
+
+  Future<Map<String, dynamic>> getMemberDashboardStats() async {
+    final response = await _dio.get('/book/dashboard');
+    if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+      return response.data;
+    }
+    throw Exception('Gagal mengambil data dashboard');
+  }
+
+  // Mendapatkan role user dari token/session
+  Future<String> getUserRole() async {
+    // Misal role disimpan di SharedPreferences setelah login
+    // Ganti sesuai implementasi penyimpananmu
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_role') ?? 'member';
+  }
+
+  // Mendapatkan id member yang sedang login
+  Future<int?> getCurrentMemberId() async {
+    // Misal id disimpan di SharedPreferences setelah login
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('user_id');
   }
 }

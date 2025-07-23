@@ -143,7 +143,6 @@ class _AdminMemberManagementScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manajemen Member'),
-        backgroundColor: Colors.red.shade600,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -152,6 +151,18 @@ class _AdminMemberManagementScreenState
             tooltip: 'Refresh',
           ),
         ],
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.indigo.shade400,
+                Colors.indigo.shade600,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -176,149 +187,127 @@ class _AdminMemberManagementScreenState
 
           // Members List
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _displayedMembers.isEmpty
-                    ? const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.people, size: 64, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text(
-                              'Tidak ada member ditemukan',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.grey),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Coba kata kunci pencarian lain',
-                              style:
-                                  TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          // Member List
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: _displayedMembers.length,
-                              itemBuilder: (context, index) {
-                                final member = _displayedMembers[index];
+            child: RefreshIndicator(
+              onRefresh: _loadMembers,
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _displayedMembers.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Tidak ada member ditemukan',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: _displayedMembers.length,
+                          itemBuilder: (context, index) {
+                            final member = _displayedMembers[index];
 
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 6),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: member.isAdmin
-                                              ? Colors.red
-                                              : Colors.blue,
-                                          radius: 18,
-                                          child: Text(
-                                            member.name.isNotEmpty
-                                                ? member.name[0].toUpperCase()
-                                                : 'U',
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 6),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor: member.isAdmin
+                                          ? Colors.red
+                                          : Colors.blue,
+                                      radius: 18,
+                                      child: Text(
+                                        member.name.isNotEmpty
+                                            ? member.name[0].toUpperCase()
+                                            : 'U',
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            member.name,
                                             style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            member.email,
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 11,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            'Username: ${member.username}',
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 11,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Container(
+                                            padding:
+                                                const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: member.isAdmin
+                                                  ? Colors.red
+                                                  : Colors.blue,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              member.isAdmin
+                                                  ? "Admin"
+                                                  : "Member",
+                                              style: const TextStyle(
                                                 color: Colors.white,
+                                                fontSize: 10,
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 14),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                member.name,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                member.email,
-                                                style: TextStyle(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 11,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              Text(
-                                                'Username: ${member.username}',
-                                                style: TextStyle(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 11,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 6,
-                                                  vertical: 2,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: member.isAdmin
-                                                      ? Colors.red
-                                                      : Colors.blue,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Text(
-                                                  member.isAdmin
-                                                      ? "Admin"
-                                                      : "Member",
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        SizedBox(
-                                          width: 40,
-                                          child: IconButton(
-                                            icon: const Icon(Icons.info,
-                                                color: Colors.blue, size: 20),
-                                            onPressed: () =>
-                                                _showMemberDetails(member),
-                                            constraints: const BoxConstraints(
-                                              minWidth: 32,
-                                              minHeight: 32,
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-
-                          // Pagination Controls
-                          if (_allMembers.isNotEmpty)
-                            _buildPaginationControls(),
-                        ],
-                      ),
+                                    const SizedBox(width: 4),
+                                    SizedBox(
+                                      width: 40,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.info,
+                                            color: Colors.blue, size: 20),
+                                        onPressed: () =>
+                                            _showMemberDetails(member),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 32,
+                                          minHeight: 32,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+            ),
           ),
         ],
       ),

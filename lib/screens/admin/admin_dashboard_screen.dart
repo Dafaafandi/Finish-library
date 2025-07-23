@@ -28,10 +28,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   void _loadAdminData() async {
     final name = await _apiService.getUserName();
-    final stats = await _apiService.getDashboardStats();
+    final stats = await _apiService.getDashboardData();
     setState(() {
       _userName = name;
-      _dashboardStats = stats;
+      _dashboardStats = stats['dashboard'] ?? stats; // ambil isi dashboard
     });
   }
 
@@ -68,7 +68,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
-        backgroundColor: Colors.red.shade600,
         foregroundColor: Colors.white,
         automaticallyImplyLeading: false,
         actions: [
@@ -78,46 +77,85 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               onPressed: _logout,
               tooltip: 'Logout Admin'),
         ],
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.indigo.shade400,
+                Colors.indigo.shade600,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
           // Welcome Card
           Card(
-            color: Colors.red.shade50,
             elevation: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.admin_panel_settings,
-                          color: Colors.red.shade600, size: 32),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Selamat Datang, Administrator',
-                              style: TextStyle(
-                                  fontSize: 18, color: Colors.grey.shade700)),
-                          const SizedBox(height: 4),
-                          _userName == null
-                              ? const SizedBox(
-                                  height: 28,
-                                  width: 200,
-                                  child: LinearProgressIndicator())
-                              : Text(_userName!,
-                                  style: TextStyle(
-                                      fontSize: 26,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.red.shade700)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.indigo.shade400.withOpacity(0.85),
+                    Colors.indigo.shade600.withOpacity(0.85),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.admin_panel_settings,
+                            color: Colors.white, size: 32),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          // Tambahkan Expanded di sini
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Selamat Datang, Administrator',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white.withOpacity(0.85),
+                                ),
+                                overflow: TextOverflow
+                                    .ellipsis, // opsional, biar lebih aman
+                              ),
+                              const SizedBox(height: 4),
+                              _userName == null
+                                  ? const SizedBox(
+                                      height: 28,
+                                      width: 200,
+                                      child: LinearProgressIndicator())
+                                  : Text(
+                                      _userName!,
+                                      style: const TextStyle(
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white),
+                                      overflow:
+                                          TextOverflow.ellipsis, // opsional
+                                    ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -133,14 +171,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Expanded(
                     child: _buildStatCard(
                         'Total Buku',
-                        _dashboardStats!['total_books'] ?? 0,
+                        _dashboardStats!['totalBuku'] ?? 0,
                         Icons.menu_book,
                         Colors.blue)),
                 const SizedBox(width: 8),
                 Expanded(
                     child: _buildStatCard(
                         'Total Member',
-                        _dashboardStats!['total_members'] ?? 0,
+                        _dashboardStats!['totalMember'] ?? 0,
                         Icons.people,
                         Colors.green)),
               ],
@@ -151,14 +189,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Expanded(
                     child: _buildStatCard(
                         'Dipinjam',
-                        _dashboardStats!['books_borrowed'] ?? 0,
+                        _dashboardStats!['totalDipinjam'] ?? 0,
                         Icons.bookmark_added,
                         Colors.orange)),
                 const SizedBox(width: 8),
                 Expanded(
                     child: _buildStatCard(
                         'Tersedia',
-                        _dashboardStats!['books_available'] ?? 0,
+                        (_dashboardStats!['totalStok'] ?? 0) -
+                            (_dashboardStats!['totalDipinjam'] ?? 0),
                         Icons.bookmark_border,
                         Colors.purple)),
               ],

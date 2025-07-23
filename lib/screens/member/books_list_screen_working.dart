@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../api/api_service.dart';
 import '../../models/book.dart';
 import '../../models/category.dart' as CategoryModel;
+import '../book_detail/book_detail_screen.dart';
 
 class MemberBooksListScreen extends StatefulWidget {
   const MemberBooksListScreen({super.key});
@@ -347,7 +348,11 @@ class _MemberBooksListScreenState extends State<MemberBooksListScreen> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // Navigasi ke detail buku jika ada
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => BookDetailScreen(book: book),
+            ),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(12),

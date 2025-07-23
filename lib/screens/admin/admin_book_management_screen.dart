@@ -4,6 +4,7 @@ import 'package:perpus_app/models/book.dart';
 import 'package:perpus_app/models/category.dart' as CategoryModel;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:perpus_app/screens/book_detail/book_detail_screen.dart';
 
 class AdminBookManagementScreen extends StatefulWidget {
   const AdminBookManagementScreen({super.key});
@@ -525,8 +526,23 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                 );
               } catch (e) {
                 Navigator.pop(context);
+                // Ambil pesan error dari API jika ada
+                String errorMsg = 'Gagal menghapus buku';
+                if (e is ApiException && e.message != null) {
+                  errorMsg = e.message!;
+                } else if (e is Exception) {
+                  final msg = e.toString();
+                  // Coba parsing pesan dari response API
+                  final match =
+                      RegExp(r'"message"\s*:\s*"([^"]+)"').firstMatch(msg);
+                  if (match != null) {
+                    errorMsg = match.group(1)!;
+                  } else {
+                    errorMsg = msg;
+                  }
+                }
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
+                  SnackBar(content: Text(errorMsg)),
                 );
               }
             },
@@ -669,7 +685,6 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manajemen Buku'),
-        backgroundColor: Colors.red.shade600,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -678,6 +693,18 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
             tooltip: 'Tambah Buku',
           ),
         ],
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.indigo.shade400,
+                Colors.indigo.shade600,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -1197,27 +1224,30 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
 
           // Books List
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _books.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Tidak ada buku ditemukan',
-                          style: TextStyle(fontSize: 16),
+            child: RefreshIndicator(
+              onRefresh: _loadBooks,
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _books.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Tidak ada buku ditemukan',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(8),
+                          itemCount: _books.length,
+                          itemBuilder: (context, index) {
+                            final book = _books[index];
+                            return _BookListItem(
+                              book: book,
+                              onEdit: () => _showEditBookDialog(book),
+                              onDelete: () => _deleteBook(book),
+                            );
+                          },
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(8),
-                        itemCount: _books.length,
-                        itemBuilder: (context, index) {
-                          final book = _books[index];
-                          return _BookListItem(
-                            book: book,
-                            onEdit: () => _showEditBookDialog(book),
-                            onDelete: () => _deleteBook(book),
-                          );
-                        },
-                      ),
+            ),
           ),
 
           // Pagination Controls
@@ -1330,88 +1360,98 @@ class _BookListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 80,
-              height: 110,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: book.coverUrl != null && book.coverUrl!.isNotEmpty
-                    ? Image.network(
-                        book.coverUrl!,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Container(
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: Icon(Icons.error, color: Colors.red),
-                            ),
-                          );
-                        },
-                      )
-                    : Container(
-                        color: Colors.grey[200],
-                        child: const Center(
-                          child: Icon(Icons.book, color: Colors.grey),
+    return InkWell(
+      borderRadius: BorderRadius.circular(10),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => BookDetailScreen(book: book),
+          ),
+        );
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 80,
+                height: 110,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: book.coverUrl != null && book.coverUrl!.isNotEmpty
+                      ? Image.network(
+                          book.coverUrl!,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: Icon(Icons.error, color: Colors.red),
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Icon(Icons.book, color: Colors.grey),
+                          ),
                         ),
-                      ),
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      book.judul,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text('oleh ${book.pengarang}',
+                        style: TextStyle(color: Colors.grey[700])),
+                    const SizedBox(height: 8),
+                    Text('Kategori: ${book.category.name}'),
+                    Text('Stok: ${book.stok}'),
+                    Text('Penerbit: ${book.penerbit} (${book.tahun})'),
+                  ],
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    book.judul,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: onEdit,
+                    tooltip: 'Edit',
                   ),
-                  const SizedBox(height: 4),
-                  Text('oleh ${book.pengarang}',
-                      style: TextStyle(color: Colors.grey[700])),
-                  const SizedBox(height: 8),
-                  Text('Kategori: ${book.category.name}'),
-                  Text('Stok: ${book.stok}'),
-                  Text('Penerbit: ${book.penerbit} (${book.tahun})'),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: onDelete,
+                    tooltip: 'Hapus',
+                  ),
                 ],
-              ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.edit, color: Colors.blue),
-                  onPressed: onEdit,
-                  tooltip: 'Edit',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: onDelete,
-                  tooltip: 'Hapus',
-                ),
-              ],
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );

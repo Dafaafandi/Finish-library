@@ -253,7 +253,6 @@ class _AdminBorrowingManagementScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manajemen Peminjaman'),
-        backgroundColor: Colors.red.shade600,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -262,6 +261,18 @@ class _AdminBorrowingManagementScreenState
             tooltip: 'Refresh',
           ),
         ],
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.indigo.shade400,
+                Colors.indigo.shade600,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -334,146 +345,123 @@ class _AdminBorrowingManagementScreenState
 
           // Borrowings List
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _displayedBorrowings.isEmpty
-                    ? const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.library_books,
-                                size: 64, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text(
-                              'Tidak ada data peminjaman',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.grey),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Coba filter lain atau refresh data',
-                              style:
-                                  TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          // Borrowings List
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: _displayedBorrowings.length,
-                              itemBuilder: (context, index) {
-                                final borrowing = _displayedBorrowings[index];
-
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 6),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor:
-                                              _getBorrowingColor(borrowing),
-                                          radius: 18,
-                                          child: Icon(
-                                            _getBorrowingIcon(borrowing),
-                                            color: Colors.white,
-                                            size: 18,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                borrowing.book?.judul ??
-                                                    'Unknown Book',
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Text(
-                                                borrowing.member?.name ??
-                                                    'Unknown Member',
-                                                style: TextStyle(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 11,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              Text(
-                                                'Pinjam: ${_formatDate(borrowing.borrowDate)}',
-                                                style: TextStyle(
-                                                  color: Colors.grey[600],
-                                                  fontSize: 10,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(height: 2),
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 6,
-                                                  vertical: 2,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: _getBorrowingColor(
-                                                      borrowing),
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Text(
-                                                  _getStatusDisplayText(
-                                                      borrowing),
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 10,
-                                                  ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        SizedBox(
-                                          width: 40,
-                                          child: IconButton(
-                                            icon: const Icon(Icons.info,
-                                                color: Colors.blue),
-                                            onPressed: () =>
-                                                _showBorrowingDetails(
-                                                    borrowing),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
+            child: RefreshIndicator(
+              onRefresh: _loadBorrowings,
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _displayedBorrowings.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Tidak ada data peminjaman',
+                            style: TextStyle(fontSize: 16),
                           ),
+                        )
+                      : ListView.builder(
+                          itemCount: _displayedBorrowings.length,
+                          itemBuilder: (context, index) {
+                            final borrowing = _displayedBorrowings[index];
 
-                          // Pagination Controls
-                          if (_allBorrowings.isNotEmpty)
-                            _buildPaginationControls(),
-                        ],
-                      ),
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 6),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      backgroundColor:
+                                          _getBorrowingColor(borrowing),
+                                      radius: 18,
+                                      child: Icon(
+                                        _getBorrowingIcon(borrowing),
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      flex: 3,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            borrowing.book?.judul ??
+                                                'Unknown Book',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            borrowing.member?.name ??
+                                                'Unknown Member',
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 11,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            'Pinjam: ${_formatDate(borrowing.borrowDate)}',
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 10,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Container(
+                                            padding:
+                                                const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: _getBorrowingColor(
+                                                  borrowing),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              _getStatusDisplayText(
+                                                  borrowing),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 10,
+                                              ),
+                                              maxLines: 1,
+                                              overflow:
+                                                  TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    SizedBox(
+                                      width: 40,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.info,
+                                            color: Colors.blue),
+                                        onPressed: () =>
+                                            _showBorrowingDetails(
+                                                borrowing),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+            ),
           ),
         ],
       ),

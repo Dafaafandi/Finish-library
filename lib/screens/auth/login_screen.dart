@@ -28,14 +28,13 @@ class _LoginScreenState extends State<LoginScreen> {
           _usernameController.text, _passwordController.text);
 
       if (success && mounted) {
-        // Check user role and redirect accordingly
-        if (authProvider.isAdmin) {
-          // Redirect to admin dashboard
+        // Cek role dari authProvider, misal: authProvider.userRole
+        final role = authProvider.userRole?.toLowerCase() ?? '';
+        if (role == 'admin') {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
           );
         } else {
-          // Member or default user - redirect to member dashboard
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const MemberDashboardScreen()),
           );
@@ -153,34 +152,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        // Admin Access Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (_) => const AdminLoginScreen())),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.red.shade600,
-                              side: BorderSide(color: Colors.red.shade600),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.admin_panel_settings,
-                                    size: 20),
-                                const SizedBox(width: 8),
-                                const Text('AKSES ADMIN',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Credential Test Button
+                        // HAPUS tombol "Akses Admin" di sini
+                        // Credential Test Button tetap boleh ada jika perlu
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton(
