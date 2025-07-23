@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:perpus_app/providers/auth_provider.dart';
 import 'package:perpus_app/screens/auth/register_screen.dart';
-import 'package:perpus_app/screens/auth/admin_login_screen.dart';
 import 'package:perpus_app/screens/admin/admin_dashboard_screen.dart';
-import 'package:perpus_app/screens/credential_test_screen.dart';
 import '../member/member_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -152,33 +150,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        // HAPUS tombol "Akses Admin" di sini
-                        // Credential Test Button tetap boleh ada jika perlu
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        const CredentialTestScreen())),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: Colors.blue.shade600,
-                              side: BorderSide(color: Colors.blue.shade600),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.api, size: 20),
-                                const SizedBox(width: 8),
-                                const Text('TEST API CREDENTIALS',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),

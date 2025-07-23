@@ -476,8 +476,6 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ID: ${borrowing['id']}'),
-            const SizedBox(height: 8),
             Text('Buku: ${borrowing['book']?['judul'] ?? 'Unknown'}'),
             Text('Pengarang: ${borrowing['book']?['pengarang'] ?? 'Unknown'}'),
             const SizedBox(height: 8),
