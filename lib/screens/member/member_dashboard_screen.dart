@@ -46,7 +46,10 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
         int returned = memberBorrowings.where((b) {
           final status = b['status']?.toString();
           final tglKembali = b['tanggal_pengembalian'];
-          return status == "3" || (tglKembali != null && tglKembali.toString().isNotEmpty && status != "1");
+          return status == "3" ||
+              (tglKembali != null &&
+                  tglKembali.toString().isNotEmpty &&
+                  status != "1");
         }).length;
 
         stats = {
@@ -54,7 +57,6 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
           'returned': returned,
         };
       } else {
-        // Admin: tampilkan statistik global
         final dashboardStats = await _apiService.getMemberDashboardStats();
         final dashboard = dashboardStats['data']?['dashboard'] ?? {};
         stats = {
@@ -101,14 +103,9 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
         return false;
       }).toList();
 
-      print(
-          'DEBUG: Found ${memberBorrowings.length} borrowings for member $_currentMemberId');
-
       // Debug: Print first few borrowings to understand structure
       for (int i = 0; i < memberBorrowings.length && i < 5; i++) {
         final borrowing = memberBorrowings[i];
-        print(
-            'DEBUG Sample ${i + 1}: ID=${borrowing['id']}, Status=${borrowing['status']}, ActualReturnDate=${borrowing['tanggal_pengembalian_aktual']}, DueDate=${borrowing['tanggal_pengembalian']}');
       }
 
       int totalBorrowed = memberBorrowings.length;
@@ -168,15 +165,9 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
           currentlyBorrowed++;
         } else {
           // Unknown status, treat as currently borrowed
-          print('Unknown status: $statusStr for borrowing ${borrowing['id']}');
           currentlyBorrowed++;
         }
       }
-
-      print(
-          'DEBUG Final Stats: Total=$totalBorrowed, Currently=$currentlyBorrowed, Returned=$returned, Overdue=$overdue');
-      print(
-          'DEBUG Calculation: $returned + $currentlyBorrowed + $overdue = ${returned + currentlyBorrowed + overdue} (should equal $totalBorrowed)');
 
       setState(() {
         _stats = {
@@ -375,12 +366,19 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
                             'Cari Buku',
                             Icons.search,
                             Colors.blue.shade700,
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MemberBooksListScreen(),
-                              ),
-                            ),
+                            () async {
+                              var result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MemberBooksListScreen(),
+                                ),
+                              );
+                              print("result");
+                              print(result);
+                              if (result != null && result is String) {
+                                _loadMemberData();
+                              }
+                            },
                           ),
                         ),
                         const SizedBox(width: 16),

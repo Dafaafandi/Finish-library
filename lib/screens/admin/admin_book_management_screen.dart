@@ -187,99 +187,158 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
     int? selectedCategoryId = book?.category.id;
     File? selectedImage;
     final ImagePicker picker = ImagePicker();
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: Text(book == null ? 'Tambah Buku' : 'Edit Buku'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Judul Buku',
-                    border: OutlineInputBorder(),
-                    isDense: true,
+          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Judul Buku
+                  TextField(
+                    controller: titleController,
+                    decoration: const InputDecoration(
+                      labelText: 'Judul Buku',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: authorController,
-                  decoration: const InputDecoration(
-                    labelText: 'Pengarang',
-                    border: OutlineInputBorder(),
-                    isDense: true,
+                  const SizedBox(height: 12),
+
+                  // Pengarang
+                  TextField(
+                    controller: authorController,
+                    decoration: const InputDecoration(
+                      labelText: 'Pengarang',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: publisherController,
-                  decoration: const InputDecoration(
-                    labelText: 'Penerbit',
-                    border: OutlineInputBorder(),
-                    isDense: true,
+                  const SizedBox(height: 12),
+
+                  // Penerbit
+                  TextField(
+                    controller: publisherController,
+                    decoration: const InputDecoration(
+                      labelText: 'Penerbit',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: yearController,
-                  decoration: const InputDecoration(
-                    labelText: 'Tahun',
-                    border: OutlineInputBorder(),
-                    isDense: true,
+                  const SizedBox(height: 12),
+
+                  // Tahun
+                  TextField(
+                    controller: yearController,
+                    decoration: const InputDecoration(
+                      labelText: 'Tahun',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    keyboardType: TextInputType.number,
                   ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: stockController,
-                  decoration: const InputDecoration(
-                    labelText: 'Stok',
-                    border: OutlineInputBorder(),
-                    isDense: true,
+                  const SizedBox(height: 12),
+
+                  // Stok
+                  TextField(
+                    controller: stockController,
+                    decoration: const InputDecoration(
+                      labelText: 'Stok',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    keyboardType: TextInputType.number,
                   ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 12),
-                // Image picker section
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
+                  const SizedBox(height: 12),
+
+                  // Kategori Dropdown
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return DropdownButtonFormField<int>(
+                        value: selectedCategoryId,
+                        isDense: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Kategori',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 12),
+                        ),
+                        items: _categories.isEmpty
+                            ? [
+                                const DropdownMenuItem<int>(
+                                  value: null,
+                                  child: Text('Loading categories...'),
+                                )
+                              ]
+                            : [
+                                const DropdownMenuItem<int>(
+                                  value: null,
+                                  child: Text('Pilih Kategori'),
+                                ),
+                                ..._categories
+                                    .map<DropdownMenuItem<int>>((category) {
+                                  return DropdownMenuItem<int>(
+                                    value: category.id,
+                                    child: SizedBox(
+                                      width: constraints.maxWidth -
+                                          80, // Biar tidak overflow
+                                      child: Text(
+                                        category.name,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ],
+                        onChanged: (value) {
+                          setDialogState(() {
+                            selectedCategoryId = value;
+                          });
+                        },
+                      );
+                    },
                   ),
-                  child: Column(
-                    children: [
-                      if (selectedImage != null)
-                        Container(
-                          height: 120,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: DecorationImage(
-                              image: FileImage(selectedImage!),
-                              fit: BoxFit.cover,
-                            ),
+                  const SizedBox(height: 16),
+
+                  // Image picker section
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Gambar Sampul',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey,
                           ),
-                        )
-                      else if (book != null &&
-                          book.path != null &&
-                          book.path!.isNotEmpty)
-                        Container(
-                          height: 120,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                  'http://perpus-api.mamorasoft.com/${book.path!}'),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        )
-                      else
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Image preview
                         Container(
                           height: 120,
                           width: double.infinity,
@@ -287,111 +346,117 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                             borderRadius: BorderRadius.circular(8),
                             color: Colors.grey[200],
                           ),
-                          child: const Icon(
-                            Icons.image,
-                            size: 40,
-                            color: Colors.grey,
-                          ),
+                          child: selectedImage != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    selectedImage!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : (book != null &&
+                                      book.path != null &&
+                                      book.path!.isNotEmpty)
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        'http://perpus-api.mamorasoft.com/${book.path!}',
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return const Center(
+                                            child: Icon(
+                                              Icons.broken_image,
+                                              size: 40,
+                                              color: Colors.grey,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : const Center(
+                                      child: Icon(
+                                        Icons.image,
+                                        size: 40,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                         ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ElevatedButton.icon(
-                            onPressed: () async {
-                              final XFile? image = await picker.pickImage(
-                                source: ImageSource.gallery,
-                                imageQuality: 80,
-                              );
-                              if (image != null) {
-                                setDialogState(() {
-                                  selectedImage = File(image.path);
-                                });
-                              }
-                            },
-                            icon: const Icon(Icons.photo_library, size: 16),
-                            label: const Text('Galeri',
-                                style: TextStyle(fontSize: 12)),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                            ),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () async {
-                              final XFile? image = await picker.pickImage(
-                                source: ImageSource.camera,
-                                imageQuality: 80,
-                              );
-                              if (image != null) {
-                                setDialogState(() {
-                                  selectedImage = File(image.path);
-                                });
-                              }
-                            },
-                            icon: const Icon(Icons.camera_alt, size: 16),
-                            label: const Text('Kamera',
-                                style: TextStyle(fontSize: 12)),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (selectedImage != null ||
-                          (book != null &&
-                              book.path != null &&
-                              book.path!.isNotEmpty))
-                        TextButton(
-                          onPressed: () {
-                            setDialogState(() {
-                              selectedImage = null;
-                            });
-                          },
-                          child: const Text('Hapus Gambar'),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<int>(
-                  value: selectedCategoryId,
-                  isDense: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Kategori',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
-                  items: _categories.isEmpty
-                      ? [
-                          const DropdownMenuItem<int>(
-                            value: null,
-                            child: Text('Loading categories...'),
-                          )
-                        ]
-                      : [
-                          const DropdownMenuItem<int>(
-                            value: null,
-                            child: Text('Pilih Kategori'),
-                          ),
-                          ..._categories.map<DropdownMenuItem<int>>((category) {
-                            return DropdownMenuItem<int>(
-                              value: category.id,
-                              child: Text(
-                                category.name,
-                                overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 12),
+
+                        // Image picker buttons
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  final XFile? image = await picker.pickImage(
+                                    source: ImageSource.gallery,
+                                    imageQuality: 80,
+                                  );
+                                  if (image != null) {
+                                    setDialogState(() {
+                                      selectedImage = File(image.path);
+                                    });
+                                  }
+                                },
+                                icon: const Icon(Icons.photo_library, size: 16),
+                                label: const Text('Galeri'),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                ),
                               ),
-                            );
-                          }).toList(),
-                        ],
-                  onChanged: (value) {
-                    setDialogState(() {
-                      selectedCategoryId = value;
-                    });
-                  },
-                ),
-              ],
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  final XFile? image = await picker.pickImage(
+                                    source: ImageSource.camera,
+                                    imageQuality: 80,
+                                  );
+                                  if (image != null) {
+                                    setDialogState(() {
+                                      selectedImage = File(image.path);
+                                    });
+                                  }
+                                },
+                                icon: const Icon(Icons.camera_alt, size: 16),
+                                label: const Text('Kamera'),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Remove image button
+                        if (selectedImage != null ||
+                            (book != null &&
+                                book.path != null &&
+                                book.path!.isNotEmpty))
+                          Center(
+                            child: TextButton.icon(
+                              onPressed: () {
+                                setDialogState(() {
+                                  selectedImage = null;
+                                });
+                              },
+                              icon: const Icon(Icons.delete, size: 16),
+                              label: const Text('Hapus Gambar'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -706,221 +771,173 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                labelText: 'Cari buku...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                _loadBooks(resetPage: true);
-              },
-            ),
-          ),
-
-          // Filter Section with Clear Active Filter Indicators
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: ExpansionTile(
-              title: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    const Text('Filter & Sorting'),
-                    const SizedBox(width: 6),
-                    if (_hasActiveFilters())
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          _getActiveFilterCount().toString(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 11),
-                        ),
-                      ),
-                  ],
+      body: SingleChildScrollView(
+        // <--- Tambahkan ini
+        child: Column(
+          children: [
+            // Search Bar
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  labelText: 'Cari buku...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
                 ),
+                onChanged: (value) {
+                  _loadBooks(resetPage: true);
+                },
               ),
-              leading: Icon(
-                Icons.filter_list,
-                color: _hasActiveFilters() ? Colors.blue : null,
-              ),
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+
+            // Filter Section with Clear Active Filter Indicators
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: ExpansionTile(
+                title: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
                     children: [
-                      // Active filters summary
+                      const Text('Filter & Sorting'),
+                      const SizedBox(width: 6),
                       if (_hasActiveFilters())
                         Container(
-                          padding: const EdgeInsets.all(6),
-                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 1),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            border: Border.all(color: Colors.blue.shade200),
-                            borderRadius: BorderRadius.circular(6),
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: Icon(Icons.filter_alt,
-                                        size: 16, color: Colors.blue.shade700),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                    child: Text(
-                                      'Filter Aktif:',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue.shade700,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Wrap(
-                                spacing: 4,
-                                runSpacing: 1,
-                                children: _buildActiveFilterChips(),
-                              ),
-                            ],
+                          child: Text(
+                            _getActiveFilterCount().toString(),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 11),
                           ),
                         ),
-
-                      // Filters in Column for better mobile layout
-                      Column(
-                        children: [
-                          // Category Filter
-                          DropdownButtonFormField<int>(
-                            value: _selectedCategoryId,
-                            isDense: true,
-                            decoration: InputDecoration(
-                              labelText: 'Kategori',
-                              border: const OutlineInputBorder(),
-                              filled: true,
-                              fillColor: _selectedCategoryId != null
-                                  ? Colors.blue.shade50
-                                  : Colors.white,
-                              prefixIcon: Icon(
-                                Icons.category,
-                                size: 18,
-                                color: _selectedCategoryId != null
-                                    ? Colors.blue
-                                    : Colors.grey,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
+                    ],
+                  ),
+                ),
+                leading: Icon(
+                  Icons.filter_list,
+                  color: _hasActiveFilters() ? Colors.blue : null,
+                ),
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Active filters summary
+                        if (_hasActiveFilters())
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            margin: const EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              border: Border.all(color: Colors.blue.shade200),
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            items: [
-                              const DropdownMenuItem<int>(
-                                value: null,
-                                child: Text('Semua Kategori'),
-                              ),
-                              ..._categories
-                                  .map<DropdownMenuItem<int>>((category) {
-                                return DropdownMenuItem<int>(
-                                  value: category.id,
-                                  child: Text(
-                                    category.name,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                );
-                              }).toList(),
-                            ],
-                            onChanged: (value) {
-                              setState(() => _selectedCategoryId = value);
-                              _loadBooks(resetPage: true);
-                            },
-                          ),
-                          const SizedBox(height: 6),
-
-                          // Author Filter
-                          DropdownButtonFormField<String>(
-                            value: _selectedAuthor,
-                            isDense: true,
-                            decoration: InputDecoration(
-                              labelText: 'Pengarang',
-                              border: const OutlineInputBorder(),
-                              filled: true,
-                              fillColor: _selectedAuthor != null
-                                  ? Colors.blue.shade50
-                                  : Colors.white,
-                              prefixIcon: Icon(
-                                Icons.person,
-                                size: 18,
-                                color: _selectedAuthor != null
-                                    ? Colors.blue
-                                    : Colors.grey,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Icon(Icons.filter_alt,
+                                          size: 16,
+                                          color: Colors.blue.shade700),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        'Filter Aktif:',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Wrap(
+                                  spacing: 4,
+                                  runSpacing: 1,
+                                  children: _buildActiveFilterChips(),
+                                ),
+                              ],
                             ),
-                            items: [
-                              const DropdownMenuItem<String>(
-                                value: null,
-                                child: Text('Semua Pengarang'),
-                              ),
-                              ..._authors.map((author) {
-                                return DropdownMenuItem<String>(
-                                  value: author,
-                                  child: Text(
-                                    author,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                );
-                              }).toList(),
-                            ],
-                            onChanged: (value) {
-                              setState(() => _selectedAuthor = value);
-                              _loadBooks(resetPage: true);
-                            },
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
 
-                      // Publisher and Year in Row
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              isExpanded: true,
-                              value: _selectedPublisher,
+                        // Filters in Column for better mobile layout
+                        Column(
+                          children: [
+                            // Category Filter
+                            DropdownButtonFormField<int>(
+                              value: _selectedCategoryId,
                               isDense: true,
                               decoration: InputDecoration(
-                                labelText: 'Penerbit',
+                                labelText: 'Kategori',
                                 border: const OutlineInputBorder(),
                                 filled: true,
-                                fillColor: _selectedPublisher != null
+                                fillColor: _selectedCategoryId != null
                                     ? Colors.blue.shade50
                                     : Colors.white,
                                 prefixIcon: Icon(
-                                  Icons.business,
+                                  Icons.category,
                                   size: 18,
-                                  color: _selectedPublisher != null
+                                  color: _selectedCategoryId != null
+                                      ? Colors.blue
+                                      : Colors.grey,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                              ),
+                              items: [
+                                const DropdownMenuItem<int>(
+                                  value: null,
+                                  child: Text('Semua Kategori'),
+                                ),
+                                ..._categories
+                                    .map<DropdownMenuItem<int>>((category) {
+                                  return DropdownMenuItem<int>(
+                                    value: category.id,
+                                    child: Text(
+                                      category.name,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }).toList(),
+                              ],
+                              onChanged: (value) {
+                                setState(() => _selectedCategoryId = value);
+                                _loadBooks(resetPage: true);
+                              },
+                            ),
+                            const SizedBox(height: 6),
+
+                            // Author Filter
+                            DropdownButtonFormField<String>(
+                              value: _selectedAuthor,
+                              isDense: true,
+                              decoration: InputDecoration(
+                                labelText: 'Pengarang',
+                                border: const OutlineInputBorder(),
+                                filled: true,
+                                fillColor: _selectedAuthor != null
+                                    ? Colors.blue.shade50
+                                    : Colors.white,
+                                prefixIcon: Icon(
+                                  Icons.person,
+                                  size: 18,
+                                  color: _selectedAuthor != null
                                       ? Colors.blue
                                       : Colors.grey,
                                 ),
@@ -932,299 +949,359 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                               items: [
                                 const DropdownMenuItem<String>(
                                   value: null,
-                                  child: Text('Semua Penerbit',
-                                      overflow: TextOverflow.ellipsis),
+                                  child: Text('Semua Pengarang'),
                                 ),
-                                ..._publishers.map((publisher) {
+                                ..._authors.map((author) {
                                   return DropdownMenuItem<String>(
-                                    value: publisher,
+                                    value: author,
                                     child: Text(
-                                      publisher,
+                                      author,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   );
                                 }).toList(),
                               ],
                               onChanged: (value) {
-                                setState(() => _selectedPublisher = value);
+                                setState(() => _selectedAuthor = value);
                                 _loadBooks(resetPage: true);
                               },
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: DropdownButtonFormField<int>(
-                              isExpanded: true,
-                              value: _selectedYear,
-                              isDense: true,
-                              decoration: InputDecoration(
-                                labelText: 'Tahun',
-                                border: const OutlineInputBorder(),
-                                filled: true,
-                                fillColor: _selectedYear != null
-                                    ? Colors.blue.shade50
-                                    : Colors.white,
-                                prefixIcon: Icon(
-                                  Icons.calendar_today,
-                                  size: 12,
-                                  color: _selectedYear != null
-                                      ? Colors.blue
-                                      : Colors.grey,
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+
+                        // Publisher and Year in Row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                isExpanded: true,
+                                value: _selectedPublisher,
+                                isDense: true,
+                                decoration: InputDecoration(
+                                  labelText: 'Penerbit',
+                                  border: const OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: _selectedPublisher != null
+                                      ? Colors.blue.shade50
+                                      : Colors.white,
+                                  prefixIcon: Icon(
+                                    Icons.business,
+                                    size: 18,
+                                    color: _selectedPublisher != null
+                                        ? Colors.blue
+                                        : Colors.grey,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
                                 ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 6,
-                                ),
-                              ),
-                              items: [
-                                const DropdownMenuItem<int>(
-                                  value: null,
-                                  child: Text('Semua Tahun',
-                                      overflow: TextOverflow.ellipsis),
-                                ),
-                                ..._years.map((year) {
-                                  return DropdownMenuItem<int>(
-                                    value: year,
-                                    child: Text(year.toString(),
+                                items: [
+                                  const DropdownMenuItem<String>(
+                                    value: null,
+                                    child: Text('Semua Penerbit',
                                         overflow: TextOverflow.ellipsis),
+                                  ),
+                                  ..._publishers.map((publisher) {
+                                    return DropdownMenuItem<String>(
+                                      value: publisher,
+                                      child: Text(
+                                        publisher,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    );
+                                  }).toList(),
+                                ],
+                                onChanged: (value) {
+                                  setState(() => _selectedPublisher = value);
+                                  _loadBooks(resetPage: true);
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: DropdownButtonFormField<int>(
+                                isExpanded: true,
+                                value: _selectedYear,
+                                isDense: true,
+                                decoration: InputDecoration(
+                                  labelText: 'Tahun',
+                                  border: const OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: _selectedYear != null
+                                      ? Colors.blue.shade50
+                                      : Colors.white,
+                                  prefixIcon: Icon(
+                                    Icons.calendar_today,
+                                    size: 12,
+                                    color: _selectedYear != null
+                                        ? Colors.blue
+                                        : Colors.grey,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                ),
+                                items: [
+                                  const DropdownMenuItem<int>(
+                                    value: null,
+                                    child: Text('Semua Tahun',
+                                        overflow: TextOverflow.ellipsis),
+                                  ),
+                                  ..._years.map((year) {
+                                    return DropdownMenuItem<int>(
+                                      value: year,
+                                      child: Text(year.toString(),
+                                          overflow: TextOverflow.ellipsis),
+                                    );
+                                  }).toList(),
+                                ],
+                                onChanged: (value) {
+                                  setState(() => _selectedYear = value);
+                                  _loadBooks(resetPage: true);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+
+                        // Row 3: Status Filter (full width)
+                        DropdownButtonFormField<String>(
+                          value: _selectedStatus,
+                          isDense: true,
+                          decoration: InputDecoration(
+                            labelText: 'Status Ketersediaan',
+                            border: const OutlineInputBorder(),
+                            filled: true,
+                            fillColor: (_selectedStatus != null &&
+                                    _selectedStatus != 'Semua')
+                                ? Colors.blue.shade50
+                                : Colors.white,
+                            prefixIcon: Icon(
+                              Icons.inventory,
+                              size: 12,
+                              color: (_selectedStatus != null &&
+                                      _selectedStatus != 'Semua')
+                                  ? Colors.blue
+                                  : Colors.grey,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                          ),
+                          items: _statusOptions.map((status) {
+                            return DropdownMenuItem<String>(
+                              value: status,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    status == 'Tersedia'
+                                        ? Icons.check_circle
+                                        : status == 'Dipinjam'
+                                            ? Icons.remove_circle
+                                            : Icons.all_inclusive,
+                                    size: 16,
+                                    color: status == 'Tersedia'
+                                        ? Colors.green
+                                        : status == 'Dipinjam'
+                                            ? Colors.red
+                                            : Colors.grey,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(status),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() => _selectedStatus = value);
+                            _loadBooks(resetPage: true);
+                          },
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Row 4: Sort options
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                isExpanded: true,
+                                value: _sortBy,
+                                decoration: InputDecoration(
+                                  labelText: 'Urutkan berdasarkan',
+                                  border: const OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: _sortBy != 'judul'
+                                      ? Colors.orange.shade50
+                                      : Colors.white,
+                                  prefixIcon: Icon(
+                                    Icons.sort,
+                                    color: _sortBy != 'judul'
+                                        ? Colors.orange
+                                        : Colors.grey,
+                                  ),
+                                ),
+                                items: _sortByOptions.map((option) {
+                                  String displayText = option;
+                                  IconData iconData = Icons.sort_by_alpha;
+                                  switch (option) {
+                                    case 'judul':
+                                      displayText = 'Judul';
+                                      iconData = Icons.title;
+                                      break;
+                                    case 'pengarang':
+                                      displayText = 'Pengarang';
+                                      iconData = Icons.person;
+                                      break;
+                                    case 'penerbit':
+                                      displayText = 'Penerbit';
+                                      iconData = Icons.business;
+                                      break;
+                                    case 'tahun':
+                                      displayText = 'Tahun';
+                                      iconData = Icons.calendar_today;
+                                      break;
+                                  }
+                                  return DropdownMenuItem<String>(
+                                    value: option,
+                                    child: Row(
+                                      children: [
+                                        Icon(iconData, size: 16),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            displayText,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   );
                                 }).toList(),
-                              ],
-                              onChanged: (value) {
-                                setState(() => _selectedYear = value);
-                                _loadBooks(resetPage: true);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Row 3: Status Filter (full width)
-                      DropdownButtonFormField<String>(
-                        value: _selectedStatus,
-                        isDense: true,
-                        decoration: InputDecoration(
-                          labelText: 'Status Ketersediaan',
-                          border: const OutlineInputBorder(),
-                          filled: true,
-                          fillColor: (_selectedStatus != null &&
-                                  _selectedStatus != 'Semua')
-                              ? Colors.blue.shade50
-                              : Colors.white,
-                          prefixIcon: Icon(
-                            Icons.inventory,
-                            size: 12,
-                            color: (_selectedStatus != null &&
-                                    _selectedStatus != 'Semua')
-                                ? Colors.blue
-                                : Colors.grey,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                        ),
-                        items: _statusOptions.map((status) {
-                          return DropdownMenuItem<String>(
-                            value: status,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  status == 'Tersedia'
-                                      ? Icons.check_circle
-                                      : status == 'Dipinjam'
-                                          ? Icons.remove_circle
-                                          : Icons.all_inclusive,
-                                  size: 16,
-                                  color: status == 'Tersedia'
-                                      ? Colors.green
-                                      : status == 'Dipinjam'
-                                          ? Colors.red
-                                          : Colors.grey,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(status),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() => _selectedStatus = value);
-                          _loadBooks(resetPage: true);
-                        },
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Row 4: Sort options
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              isExpanded: true,
-                              value: _sortBy,
-                              decoration: InputDecoration(
-                                labelText: 'Urutkan berdasarkan',
-                                border: const OutlineInputBorder(),
-                                filled: true,
-                                fillColor: _sortBy != 'judul'
-                                    ? Colors.orange.shade50
-                                    : Colors.white,
-                                prefixIcon: Icon(
-                                  Icons.sort,
-                                  color: _sortBy != 'judul'
-                                      ? Colors.orange
-                                      : Colors.grey,
-                                ),
+                                onChanged: (value) {
+                                  setState(() => _sortBy = value ?? 'judul');
+                                  _loadBooks(resetPage: true);
+                                },
                               ),
-                              items: _sortByOptions.map((option) {
-                                String displayText = option;
-                                IconData iconData = Icons.sort_by_alpha;
-                                switch (option) {
-                                  case 'judul':
-                                    displayText = 'Judul';
-                                    iconData = Icons.title;
-                                    break;
-                                  case 'pengarang':
-                                    displayText = 'Pengarang';
-                                    iconData = Icons.person;
-                                    break;
-                                  case 'penerbit':
-                                    displayText = 'Penerbit';
-                                    iconData = Icons.business;
-                                    break;
-                                  case 'tahun':
-                                    displayText = 'Tahun';
-                                    iconData = Icons.calendar_today;
-                                    break;
-                                }
-                                return DropdownMenuItem<String>(
-                                  value: option,
-                                  child: Row(
-                                    children: [
-                                      Icon(iconData, size: 16),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          displayText,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                isExpanded: true,
+                                value: _sortOrder,
+                                decoration: InputDecoration(
+                                  labelText: 'Urutan',
+                                  border: const OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: _sortOrder != 'asc'
+                                      ? Colors.orange.shade50
+                                      : Colors.white,
+                                  prefixIcon: Icon(
+                                    _sortOrder == 'asc'
+                                        ? Icons.arrow_upward
+                                        : Icons.arrow_downward,
+                                    color: _sortOrder != 'asc'
+                                        ? Colors.orange
+                                        : Colors.grey,
                                   ),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() => _sortBy = value ?? 'judul');
-                                _loadBooks(resetPage: true);
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              isExpanded: true,
-                              value: _sortOrder,
-                              decoration: InputDecoration(
-                                labelText: 'Urutan',
-                                border: const OutlineInputBorder(),
-                                filled: true,
-                                fillColor: _sortOrder != 'asc'
-                                    ? Colors.orange.shade50
-                                    : Colors.white,
-                                prefixIcon: Icon(
-                                  _sortOrder == 'asc'
-                                      ? Icons.arrow_upward
-                                      : Icons.arrow_downward,
-                                  color: _sortOrder != 'asc'
-                                      ? Colors.orange
-                                      : Colors.grey,
                                 ),
-                              ),
-                              items: _sortOrderOptions.map((option) {
-                                return DropdownMenuItem<String>(
-                                  value: option,
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        option == 'asc'
-                                            ? Icons.arrow_upward
-                                            : Icons.arrow_downward,
-                                        size: 16,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
+                                items: _sortOrderOptions.map((option) {
+                                  return DropdownMenuItem<String>(
+                                    value: option,
+                                    child: Row(
+                                      children: [
+                                        Icon(
                                           option == 'asc'
-                                              ? 'A-Z (Naik)'
-                                              : 'Z-A (Turun)',
-                                          overflow: TextOverflow.ellipsis,
+                                              ? Icons.arrow_upward
+                                              : Icons.arrow_downward,
+                                          size: 16,
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() => _sortOrder = value ?? 'asc');
-                                _loadBooks(resetPage: true);
-                              },
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            option == 'asc'
+                                                ? 'A-Z (Naik)'
+                                                : 'Z-A (Turun)',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() => _sortOrder = value ?? 'asc');
+                                  _loadBooks(resetPage: true);
+                                },
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
 
-                      // Row 5: Reset and info with better styling
-                      Row(
-                        children: [
-                          ElevatedButton.icon(
-                            onPressed: _clearFilters,
-                            icon: const Icon(Icons.clear_all),
-                            label: const Text('Reset Semua Filter'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red.shade50,
-                              foregroundColor: Colors.red.shade700,
-                              side: BorderSide(color: Colors.red.shade200),
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade50,
-                              border: Border.all(color: Colors.green.shade200),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.book,
-                                    size: 16, color: Colors.green.shade700),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Total: $_totalItems buku',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade700,
-                                  ),
+                        // Row 5: Reset and info with better styling
+                        Row(
+                          children: [
+                            // Gunakan Expanded agar tombol dan info tidak overflow
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: _clearFilters,
+                                icon: const Icon(Icons.clear_all),
+                                label: const Text('Reset Semua Filter'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red.shade50,
+                                  foregroundColor: Colors.red.shade700,
+                                  side: BorderSide(color: Colors.red.shade200),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade50,
+                                  border:
+                                      Border.all(color: Colors.green.shade200),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.book,
+                                        size: 16, color: Colors.green.shade700),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        'Total: $_totalItems buku',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green.shade700,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Books List
-          Expanded(
-            child: RefreshIndicator(
+            // Books List
+            RefreshIndicator(
               onRefresh: _loadBooks,
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -1238,6 +1315,9 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                       : ListView.builder(
                           padding: const EdgeInsets.all(8),
                           itemCount: _books.length,
+                          shrinkWrap: true, // <--- TAMBAHKAN baris ini
+                          physics:
+                              const NeverScrollableScrollPhysics(), // <--- TAMBAHKAN baris ini
                           itemBuilder: (context, index) {
                             final book = _books[index];
                             return _BookListItem(
@@ -1248,99 +1328,100 @@ class _AdminBookManagementScreenState extends State<AdminBookManagementScreen> {
                           },
                         ),
             ),
-          ),
 
-          // Pagination Controls
-          if (_totalPages > 1)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                border: Border(top: BorderSide(color: Colors.grey.shade300)),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Halaman $_currentPage dari $_totalPages ($_totalItems buku)',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _currentPage > 1
-                            ? () {
-                                setState(() => _currentPage--);
-                                _loadBooks();
-                              }
-                            : null,
-                        icon: const Icon(Icons.chevron_left),
-                        label: const Text('Sebelumnya'),
-                      ),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              _totalPages > 7 ? 7 : _totalPages,
-                              (index) {
-                                int pageNumber;
-                                if (_totalPages <= 7) {
-                                  pageNumber = index + 1;
-                                } else if (_currentPage <= 4) {
-                                  pageNumber = index + 1;
-                                } else if (_currentPage > _totalPages - 4) {
-                                  pageNumber = _totalPages - 6 + index;
-                                } else {
-                                  pageNumber = _currentPage - 3 + index;
+            // Pagination Controls
+            if (_totalPages > 1)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  border: Border(top: BorderSide(color: Colors.grey.shade300)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Halaman $_currentPage dari $_totalPages ($_totalItems buku)',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _currentPage > 1
+                              ? () {
+                                  setState(() => _currentPage--);
+                                  _loadBooks();
                                 }
+                              : null,
+                          icon: const Icon(Icons.chevron_left),
+                          label: const Text('Sebelumnya'),
+                        ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                _totalPages > 7 ? 7 : _totalPages,
+                                (index) {
+                                  int pageNumber;
+                                  if (_totalPages <= 7) {
+                                    pageNumber = index + 1;
+                                  } else if (_currentPage <= 4) {
+                                    pageNumber = index + 1;
+                                  } else if (_currentPage > _totalPages - 4) {
+                                    pageNumber = _totalPages - 6 + index;
+                                  } else {
+                                    pageNumber = _currentPage - 3 + index;
+                                  }
 
-                                return Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 2),
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          pageNumber == _currentPage
-                                              ? Colors.red.shade600
-                                              : Colors.grey.shade300,
-                                      foregroundColor:
-                                          pageNumber == _currentPage
-                                              ? Colors.white
-                                              : Colors.black,
-                                      minimumSize: const Size(40, 36),
-                                      padding: EdgeInsets.zero,
+                                  return Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 2),
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            pageNumber == _currentPage
+                                                ? Colors.red.shade600
+                                                : Colors.grey.shade300,
+                                        foregroundColor:
+                                            pageNumber == _currentPage
+                                                ? Colors.white
+                                                : Colors.black,
+                                        minimumSize: const Size(40, 36),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                      onPressed: () {
+                                        setState(
+                                            () => _currentPage = pageNumber);
+                                        _loadBooks();
+                                      },
+                                      child: Text('$pageNumber'),
                                     ),
-                                    onPressed: () {
-                                      setState(() => _currentPage = pageNumber);
-                                      _loadBooks();
-                                    },
-                                    child: Text('$pageNumber'),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: _currentPage < _totalPages
-                            ? () {
-                                setState(() => _currentPage++);
-                                _loadBooks();
-                              }
-                            : null,
-                        icon: const Icon(Icons.chevron_right),
-                        label: const Text('Selanjutnya'),
-                      ),
-                    ],
-                  ),
-                ],
+                        ElevatedButton.icon(
+                          onPressed: _currentPage < _totalPages
+                              ? () {
+                                  setState(() => _currentPage++);
+                                  _loadBooks();
+                                }
+                              : null,
+                          icon: const Icon(Icons.chevron_right),
+                          label: const Text('Selanjutnya'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

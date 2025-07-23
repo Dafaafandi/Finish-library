@@ -157,6 +157,13 @@ class _MemberBooksListScreenState extends State<MemberBooksListScreen> {
         backgroundColor: Colors.blue.shade600,
         foregroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.teal,
+          ),
+          onPressed: () => Navigator.of(context).pop("refresh"),
+        ),
       ),
       body: Column(
         children: [
