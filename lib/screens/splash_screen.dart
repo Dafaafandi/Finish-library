@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:perpus_app/api/api_service.dart';
 import 'package:perpus_app/screens/auth/login_screen.dart';
-import 'package:perpus_app/screens/dashboard/member_dashboard_screen.dart';
 import 'package:perpus_app/screens/admin/admin_dashboard_screen.dart';
+import 'package:perpus_app/screens/member/member_dashboard_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

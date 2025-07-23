@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:perpus_app/providers/auth_provider.dart';
 import 'package:perpus_app/screens/auth/register_screen.dart';
 import 'package:perpus_app/screens/auth/admin_login_screen.dart';
-import 'package:perpus_app/screens/dashboard/member_dashboard_screen.dart';
 import 'package:perpus_app/screens/admin/admin_dashboard_screen.dart';
 import 'package:perpus_app/screens/credential_test_screen.dart';
+import '../member/member_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
