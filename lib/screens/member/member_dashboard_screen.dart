@@ -387,12 +387,22 @@ class _MemberDashboardScreenState extends State<MemberDashboardScreen> {
                             'Riwayat Peminjaman',
                             Icons.history,
                             Colors.green.shade700,
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BorrowedBooksScreen(),
-                              ),
-                            ),
+                            () async {
+                              // 1. Jadikan fungsi ini async
+                              // 2. Tunggu hasil dari BorrowedBooksScreen
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const BorrowedBooksScreen(),
+                                ),
+                              );
+
+                              // 3. Jika hasilnya adalah 'true' (artinya ada perubahan), muat ulang data.
+                              if (result == true) {
+                                _loadMemberData();
+                              }
+                            },
                           ),
                         ),
                       ],

@@ -428,8 +428,6 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
       if (mounted) {
         if (success) {
           ErrorHandler.showSuccess(context, 'Buku berhasil dikembalikan');
-
-          // Refresh data and restore due date if needed
           await _loadBorrowings();
 
           // RESTORE the original due date after API call corrupts it
