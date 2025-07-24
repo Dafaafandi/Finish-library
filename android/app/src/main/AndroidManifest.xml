@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     
     <application
-        android:label="perpus_app_new"
+        android:label="Mamorasoft Library"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
