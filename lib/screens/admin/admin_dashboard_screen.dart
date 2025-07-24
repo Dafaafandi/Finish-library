@@ -19,6 +19,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   final ApiService _apiService = ApiService();
   String? _userName;
   Map<String, dynamic>? _dashboardStats;
+  bool _isLoadingStats = false;
 
   @override
   void initState() {
@@ -28,11 +29,81 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   void _loadAdminData() async {
     final name = await _apiService.getUserName();
-    final stats = await _apiService.getDashboardData();
+    await _loadDashboardStats();
     setState(() {
       _userName = name;
-      _dashboardStats = stats['dashboard'] ?? stats; // ambil isi dashboard
     });
+  }
+
+  // Method terpisah untuk memuat ulang statistik dashboard
+  Future<void> _loadDashboardStats() async {
+    if (_isLoadingStats) return; // Prevent multiple concurrent calls
+    
+    setState(() {
+      _isLoadingStats = true;
+    });
+
+    try {
+      final stats = await _apiService.getDashboardData();
+      if (mounted) {
+        setState(() {
+          _dashboardStats = stats['dashboard'] ?? stats;
+          _isLoadingStats = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingStats = false;
+        });
+        // Optional: Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat statistik: $e')),
+        );
+      }
+    }
+  }
+
+  // Method untuk navigasi dengan callback refresh
+  void _navigateToBookManagement() async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const AdminBookManagementScreen()),
+    );
+    
+    // Jika ada perubahan data (result == true) atau tidak ada return value, refresh statistik
+    if (result == true || result == null) {
+      await _loadDashboardStats();
+    }
+  }
+
+  void _navigateToCategoryManagement() async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const AdminCategoryManagementScreen()),
+    );
+    
+    if (result == true || result == null) {
+      await _loadDashboardStats();
+    }
+  }
+
+  void _navigateToMemberManagement() async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const AdminMemberManagementScreen()),
+    );
+    
+    if (result == true || result == null) {
+      await _loadDashboardStats();
+    }
+  }
+
+  void _navigateToBorrowingManagement() async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const AdminBorrowingManagementScreen()),
+    );
+    
+    if (result == true || result == null) {
+      await _loadDashboardStats();
+    }
   }
 
   void _logout() async {
@@ -72,6 +143,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         automaticallyImplyLeading: false,
         actions: [
           const ThemeToggleButton(),
+          // Tambahkan tombol refresh manual
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _isLoadingStats ? null : _loadDashboardStats,
+            tooltip: 'Refresh Statistik',
+          ),
           IconButton(
               icon: const Icon(Icons.logout),
               onPressed: _logout,
@@ -90,165 +167,191 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          // Welcome Card
-          Card(
-            elevation: 2,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.indigo.shade400.withOpacity(0.85),
-                    Colors.indigo.shade600.withOpacity(0.85),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+      body: RefreshIndicator(
+        onRefresh: _loadDashboardStats,
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            // Welcome Card
+            Card(
+              elevation: 2,
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.indigo.shade400.withOpacity(0.85),
+                      Colors.indigo.shade600.withOpacity(0.85),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                 ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.admin_panel_settings,
-                            color: Colors.white, size: 32),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          // Tambahkan Expanded di sini
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Selamat Datang, Administrator',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white.withOpacity(0.85),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.admin_panel_settings,
+                              color: Colors.white, size: 32),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Selamat Datang, Administrator',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white.withOpacity(0.85),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                overflow: TextOverflow
-                                    .ellipsis, // opsional, biar lebih aman
-                              ),
-                              const SizedBox(height: 4),
-                              _userName == null
-                                  ? const SizedBox(
-                                      height: 28,
-                                      width: 200,
-                                      child: LinearProgressIndicator())
-                                  : Text(
-                                      _userName!,
-                                      style: const TextStyle(
-                                          fontSize: 26,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white),
-                                      overflow:
-                                          TextOverflow.ellipsis, // opsional
-                                    ),
-                            ],
+                                const SizedBox(height: 4),
+                                _userName == null
+                                    ? const SizedBox(
+                                        height: 28,
+                                        width: 200,
+                                        child: LinearProgressIndicator())
+                                    : Text(
+                                        _userName!,
+                                        style: const TextStyle(
+                                            fontSize: 26,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Statistics Cards
-          if (_dashboardStats != null) ...[
-            const Text('Statistik Perpustakaan',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                    child: _buildStatCard(
-                        'Total Buku',
-                        _dashboardStats!['totalBuku'] ?? 0,
-                        Icons.menu_book,
-                        Colors.blue)),
-                const SizedBox(width: 8),
-                Expanded(
-                    child: _buildStatCard(
-                        'Total Member',
-                        _dashboardStats!['totalMember'] ?? 0,
-                        Icons.people,
-                        Colors.green)),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                    child: _buildStatCard(
-                        'Dipinjam',
-                        _dashboardStats!['totalDipinjam'] ?? 0,
-                        Icons.bookmark_added,
-                        Colors.orange)),
-                const SizedBox(width: 8),
-                Expanded(
-                    child: _buildStatCard(
-                        'Tersedia',
-                        (_dashboardStats!['totalStok'] ?? 0) -
-                            (_dashboardStats!['totalDipinjam'] ?? 0),
-                        Icons.bookmark_border,
-                        Colors.purple)),
-              ],
             ),
             const SizedBox(height: 24),
-          ],
 
-          // Management Menu
-          const Text('Menu Manajemen',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          GridView.count(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            children: [
-              _buildAdminMenuItem(context,
-                  icon: Icons.menu_book,
-                  label: 'Manajemen Buku',
-                  color: Colors.indigo,
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const AdminBookManagementScreen()))),
-              _buildAdminMenuItem(context,
-                  icon: Icons.category,
-                  label: 'Manajemen Kategori',
-                  color: Colors.teal,
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const AdminCategoryManagementScreen()))),
-              _buildAdminMenuItem(context,
-                  icon: Icons.people,
-                  label: 'Manajemen Member',
-                  color: Colors.green,
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const AdminMemberManagementScreen()))),
-              _buildAdminMenuItem(context,
-                  icon: Icons.library_books,
-                  label: 'Peminjaman Buku',
-                  color: Colors.orange,
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const AdminBorrowingManagementScreen()))),
-              _buildAdminMenuItem(context,
-                  icon: Icons.import_export,
-                  label: 'Import/Export Data',
-                  color: Colors.blue,
-                  onTap: _showImportExportDialog),
+            // Statistics Cards
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Statistik Perpustakaan',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                if (_isLoadingStats)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            
+            if (_dashboardStats != null) ...[
+              Row(
+                children: [
+                  Expanded(
+                      child: _buildStatCard(
+                          'Total Buku',
+                          _dashboardStats!['totalBuku'] ?? 0,
+                          Icons.menu_book,
+                          Colors.blue)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                      child: _buildStatCard(
+                          'Total Member',
+                          _dashboardStats!['totalMember'] ?? 0,
+                          Icons.people,
+                          Colors.green)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                      child: _buildStatCard(
+                          'Dipinjam',
+                          _dashboardStats!['totalDipinjam'] ?? 0,
+                          Icons.bookmark_added,
+                          Colors.orange)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                      child: _buildStatCard(
+                          'Tersedia',
+                          (_dashboardStats!['totalStok'] ?? 0) -
+                              (_dashboardStats!['totalDipinjam'] ?? 0),
+                          Icons.bookmark_border,
+                          Colors.purple)),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ] else if (!_isLoadingStats) ...[
+              // Show placeholder cards when no data
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Total Buku', 0, Icons.menu_book, Colors.blue)),
+                  const SizedBox(width: 8),
+                  Expanded(child: _buildStatCard('Total Member', 0, Icons.people, Colors.green)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(child: _buildStatCard('Dipinjam', 0, Icons.bookmark_added, Colors.orange)),
+                  const SizedBox(width: 8),
+                  Expanded(child: _buildStatCard('Tersedia', 0, Icons.bookmark_border, Colors.purple)),
+                ],
+              ),
+              const SizedBox(height: 24),
             ],
-          ),
-        ],
-      ),
+
+            // Management Menu
+            const Text('Menu Manajemen',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            GridView.count(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              children: [
+                _buildAdminMenuItem(context,
+                    icon: Icons.menu_book,
+                    label: 'Manajemen Buku',
+                    color: Colors.indigo,
+                    onTap: _navigateToBookManagement), // Gunakan method baru
+                _buildAdminMenuItem(context,
+                    icon: Icons.category,
+                    label: 'Manajemen Kategori',
+                    color: Colors.teal,
+                    onTap: _navigateToCategoryManagement),
+                _buildAdminMenuItem(context,
+                    icon: Icons.people,
+                    label: 'Manajemen Member',
+                    color: Colors.green,
+                    onTap: _navigateToMemberManagement),
+                _buildAdminMenuItem(context,
+                    icon: Icons.library_books,
+                    label: 'Peminjaman Buku',
+                    color: Colors.orange,
+                    onTap: _navigateToBorrowingManagement),
+                _buildAdminMenuItem(context,
+                    icon: Icons.import_export,
+                    label: 'Import/Export Data',
+                    color: Colors.blue,
+                    onTap: _showImportExportDialog),
+              ],
+            ),
+          ],
+        ),
+      ),  
     );
   }
 
