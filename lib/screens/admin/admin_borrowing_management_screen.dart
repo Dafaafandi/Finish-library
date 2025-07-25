@@ -254,13 +254,7 @@ class _AdminBorrowingManagementScreenState
       appBar: AppBar(
         title: const Text('Manajemen Peminjaman'),
         foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadBorrowings,
-            tooltip: 'Refresh',
-          ),
-        ],
+        actions: [],
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

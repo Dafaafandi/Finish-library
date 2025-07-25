@@ -38,7 +38,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // Method terpisah untuk memuat ulang statistik dashboard
   Future<void> _loadDashboardStats() async {
     if (_isLoadingStats) return; // Prevent multiple concurrent calls
-    
+
     setState(() {
       _isLoadingStats = true;
     });
@@ -69,7 +69,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const AdminBookManagementScreen()),
     );
-    
+
     // Jika ada perubahan data (result == true) atau tidak ada return value, refresh statistik
     if (result == true || result == null) {
       await _loadDashboardStats();
@@ -80,7 +80,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const AdminCategoryManagementScreen()),
     );
-    
+
     if (result == true || result == null) {
       await _loadDashboardStats();
     }
@@ -90,7 +90,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const AdminMemberManagementScreen()),
     );
-    
+
     if (result == true || result == null) {
       await _loadDashboardStats();
     }
@@ -100,7 +100,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => const AdminBorrowingManagementScreen()),
     );
-    
+
     if (result == true || result == null) {
       await _loadDashboardStats();
     }
@@ -143,12 +143,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         automaticallyImplyLeading: false,
         actions: [
           const ThemeToggleButton(),
-          // Tambahkan tombol refresh manual
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _isLoadingStats ? null : _loadDashboardStats,
-            tooltip: 'Refresh Statistik',
-          ),
           IconButton(
               icon: const Icon(Icons.logout),
               onPressed: _logout,
@@ -175,8 +169,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             // Welcome Card
             Card(
               elevation: 2,
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -242,7 +236,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Statistik Perpustakaan',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 if (_isLoadingStats)
                   const SizedBox(
                     width: 20,
@@ -252,7 +247,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            
+
             if (_dashboardStats != null) ...[
               Row(
                 children: [
@@ -295,17 +290,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               // Show placeholder cards when no data
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Total Buku', 0, Icons.menu_book, Colors.blue)),
+                  Expanded(
+                      child: _buildStatCard(
+                          'Total Buku', 0, Icons.menu_book, Colors.blue)),
                   const SizedBox(width: 8),
-                  Expanded(child: _buildStatCard('Total Member', 0, Icons.people, Colors.green)),
+                  Expanded(
+                      child: _buildStatCard(
+                          'Total Member', 0, Icons.people, Colors.green)),
                 ],
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Dipinjam', 0, Icons.bookmark_added, Colors.orange)),
+                  Expanded(
+                      child: _buildStatCard(
+                          'Dipinjam', 0, Icons.bookmark_added, Colors.orange)),
                   const SizedBox(width: 8),
-                  Expanded(child: _buildStatCard('Tersedia', 0, Icons.bookmark_border, Colors.purple)),
+                  Expanded(
+                      child: _buildStatCard(
+                          'Tersedia', 0, Icons.bookmark_border, Colors.purple)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -351,7 +354,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ],
         ),
-      ),  
+      ),
     );
   }
 
