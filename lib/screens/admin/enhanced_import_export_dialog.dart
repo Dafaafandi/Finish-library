@@ -500,13 +500,15 @@ class _EnhancedImportExportDialogState extends State<EnhancedImportExportDialog>
                 children: [
                   Icon(icon, color: color, size: 24),
                   const SizedBox(width: 8),
-                  Expanded(
+                  Flexible(
                     child: Text(
                       title,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                      maxLines: 1,
                     ),
                   ),
                 ],
@@ -522,23 +524,17 @@ class _EnhancedImportExportDialogState extends State<EnhancedImportExportDialog>
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: _isLoading ? null : onPressed,
+                  icon: Icon(icon, size: 18),
+                  label: Text(title, overflow: TextOverflow.ellipsis),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color,
                     foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 15),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Text('Export'),
                 ),
               ),
             ],
