@@ -276,70 +276,95 @@ class _AdminBorrowingManagementScreenState
       ),
       body: Column(
         children: [
-          // Filter tabs
+          // Filter tabs scroll horizontal
           Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _setFilter('all'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _currentFilter == 'all'
-                          ? Colors.blue
-                          : Colors.grey.shade300,
-                      foregroundColor:
-                          _currentFilter == 'all' ? Colors.white : Colors.black,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ElevatedButton(
+                      onPressed: () => _setFilter('all'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _currentFilter == 'all'
+                            ? Colors.blue
+                            : Colors.grey.shade300,
+                        foregroundColor: _currentFilter == 'all'
+                            ? Colors.white
+                            : Colors.black,
+                        minimumSize: const Size(100, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child:
+                          const Text('Semua', style: TextStyle(fontSize: 16)),
                     ),
-                    child: const Text('Semua'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _setFilter('active'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _currentFilter == 'active'
-                          ? Colors.blue
-                          : Colors.grey.shade300,
-                      foregroundColor: _currentFilter == 'active'
-                          ? Colors.white
-                          : Colors.black,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ElevatedButton(
+                      onPressed: () => _setFilter('active'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _currentFilter == 'active'
+                            ? Colors.blue
+                            : Colors.grey.shade300,
+                        foregroundColor: _currentFilter == 'active'
+                            ? Colors.white
+                            : Colors.black,
+                        minimumSize: const Size(100, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child:
+                          const Text('Aktif', style: TextStyle(fontSize: 16)),
                     ),
-                    child: const Text('Aktif'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _setFilter('overdue'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _currentFilter == 'overdue'
-                          ? Colors.red
-                          : Colors.grey.shade300,
-                      foregroundColor: _currentFilter == 'overdue'
-                          ? Colors.white
-                          : Colors.black,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ElevatedButton(
+                      onPressed: () => _setFilter('overdue'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _currentFilter == 'overdue'
+                            ? Colors.red
+                            : Colors.grey.shade300,
+                        foregroundColor: _currentFilter == 'overdue'
+                            ? Colors.white
+                            : Colors.black,
+                        minimumSize: const Size(120, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Terlambat',
+                          style: TextStyle(fontSize: 16)),
                     ),
-                    child: const Text('Terlambat'),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _setFilter('returned'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _currentFilter == 'returned'
-                          ? Colors.green
-                          : Colors.grey.shade300,
-                      foregroundColor: _currentFilter == 'returned'
-                          ? Colors.white
-                          : Colors.black,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ElevatedButton(
+                      onPressed: () => _setFilter('returned'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _currentFilter == 'returned'
+                            ? Colors.green
+                            : Colors.grey.shade300,
+                        foregroundColor: _currentFilter == 'returned'
+                            ? Colors.white
+                            : Colors.black,
+                        minimumSize: const Size(120, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child:
+                          const Text('Kembali', style: TextStyle(fontSize: 16)),
                     ),
-                    child: const Text('Kembali'),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -417,28 +442,25 @@ class _AdminBorrowingManagementScreenState
                                           ),
                                           const SizedBox(height: 2),
                                           Container(
-                                            padding:
-                                                const EdgeInsets.symmetric(
+                                            padding: const EdgeInsets.symmetric(
                                               horizontal: 6,
                                               vertical: 2,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: _getBorrowingColor(
-                                                  borrowing),
+                                              color:
+                                                  _getBorrowingColor(borrowing),
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                             ),
                                             child: Text(
-                                              _getStatusDisplayText(
-                                                  borrowing),
+                                              _getStatusDisplayText(borrowing),
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 10,
                                               ),
                                               maxLines: 1,
-                                              overflow:
-                                                  TextOverflow.ellipsis,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ],
@@ -451,8 +473,7 @@ class _AdminBorrowingManagementScreenState
                                         icon: const Icon(Icons.info,
                                             color: Colors.blue),
                                         onPressed: () =>
-                                            _showBorrowingDetails(
-                                                borrowing),
+                                            _showBorrowingDetails(borrowing),
                                       ),
                                     ),
                                   ],
