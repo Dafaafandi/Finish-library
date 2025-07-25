@@ -59,12 +59,13 @@ class _AdminMemberManagementScreenState
   }
 
   void _applySearchAndPagination() {
-    List<User> filteredMembers = _searchQuery.isEmpty
-        ? _allMembers
-        : _allMembers
-            .where((member) =>
-                member.name.toLowerCase().contains(_searchQuery.toLowerCase()))
-            .toList();
+    List<User> filteredMembers = _allMembers;
+    if (_searchQuery.isNotEmpty) {
+      filteredMembers = filteredMembers
+          .where((member) =>
+              member.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .toList();
+    }
 
     _totalPages = (filteredMembers.length / _itemsPerPage).ceil();
     if (_totalPages == 0) _totalPages = 1;
@@ -261,8 +262,7 @@ class _AdminMemberManagementScreenState
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           Container(
-                                            padding:
-                                                const EdgeInsets.symmetric(
+                                            padding: const EdgeInsets.symmetric(
                                               horizontal: 6,
                                               vertical: 2,
                                             ),
@@ -309,6 +309,9 @@ class _AdminMemberManagementScreenState
                         ),
             ),
           ),
+
+          // Pagination controls
+          _buildPaginationControls(),
         ],
       ),
     );

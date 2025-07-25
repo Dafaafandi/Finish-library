@@ -249,8 +249,8 @@ class ApiService {
     }
   }
 
-  Future<bool> register(String name, String username, String email,
-      String password, String confirmPassword) async {
+  Future<Map<String, dynamic>> register(String name, String username,
+      String email, String password, String confirmPassword) async {
     try {
       final response = await _dio.post(
         '/register',
@@ -264,34 +264,97 @@ class ApiService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return true;
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          final apiStatus = data['status'];
+          if (apiStatus == 200 || apiStatus == 201) {
+            return {
+              'success': true,
+              'message': data['message'] ?? 'Registrasi berhasil',
+              'data': data['data']
+            };
+          } else {
+            String errorMessage = 'Registrasi gagal';
+            if (data['message'] is Map) {
+              final messages = data['message'] as Map<String, dynamic>;
+              List<String> errors = [];
+              messages.forEach((field, value) {
+                if (field == 'email' &&
+                    value.toString().contains('already been taken')) {
+                  errors.add('Email sudah digunakan');
+                } else if (field == 'username' &&
+                    value.toString().contains('already been taken')) {
+                  errors.add('Username sudah digunakan');
+                } else if (value is List && value.isNotEmpty) {
+                  errors.add(value.first.toString());
+                } else if (value.toString() != 'kosong') {
+                  errors.add(value.toString());
+                }
+              });
+              if (errors.isNotEmpty) {
+                errorMessage = errors.join(', ');
+              }
+            } else if (data['message'] is String) {
+              errorMessage = data['message'];
+            }
+            return {'success': false, 'message': errorMessage, 'data': data};
+          }
+        }
+        return {
+          'success': false,
+          'message': 'Response tidak valid dari server',
+          'data': null
+        };
       }
-
-      return false;
+      return {
+        'success': false,
+        'message': 'Registrasi Gagal! Coba lagi.',
+        'data': null
+      };
     } on DioException catch (e) {
-      if (kDebugMode) {
-        String message = 'Registrasi gagal';
-
-        if (e.response?.statusCode == 422) {
-          // Handle validation errors
-          final errors = e.response?.data['errors'];
-          if (errors != null && errors is Map) {
-            List<String> errorMessages = [];
-            errors.forEach((key, value) {
-              if (value is List && value.isNotEmpty) {
-                errorMessages.add(value.first.toString());
+      String message = 'Registrasi gagal';
+      if (e.response?.data != null) {
+        final errorData = e.response!.data;
+        if (errorData is Map<String, dynamic> && errorData['message'] != null) {
+          if (errorData['message'] is Map) {
+            final messages = errorData['message'] as Map<String, dynamic>;
+            List<String> errors = [];
+            messages.forEach((field, value) {
+              if (field == 'email' &&
+                  value.toString().contains('already been taken')) {
+                errors.add('Email sudah digunakan');
+              } else if (field == 'username' &&
+                  value.toString().contains('already been taken')) {
+                errors.add('Username sudah digunakan');
+              } else if (value is List && value.isNotEmpty) {
+                errors.add(value.first.toString());
+              } else if (value.toString() != 'kosong') {
+                errors.add(value.toString());
               }
             });
-            message = errorMessages.join('\n');
+            if (errors.isNotEmpty) {
+              message = errors.join(', ');
+            }
           } else {
-            message = 'Data registrasi tidak valid';
+            message = errorData['message'].toString();
           }
-        } else if (e.type == DioExceptionType.connectionError) {
-          message = 'Tidak dapat terhubung ke server';
         }
+      } else if (e.response?.statusCode == 409) {
+        message = 'Data sudah digunakan (email atau username)';
+      } else if (e.response?.statusCode == 422) {
+        message = 'Data tidak valid';
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        message = 'Koneksi timeout, periksa internet Anda';
+      } else if (e.type == DioExceptionType.connectionError) {
+        message = 'Tidak dapat terhubung ke server';
       }
-
-      return false;
+      return {'success': false, 'message': message, 'data': e.response?.data};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Terjadi kesalahan yang tidak terduga',
+        'data': null
+      };
     }
   }
 

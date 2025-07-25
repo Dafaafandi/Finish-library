@@ -160,7 +160,8 @@ class _MemberBooksListScreenState extends State<MemberBooksListScreen> {
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
-            color: Colors.teal,
+            color: Colors
+                .white, // Changed from Colors.teal to white for visibility
           ),
           onPressed: () => Navigator.of(context).pop("refresh"),
         ),

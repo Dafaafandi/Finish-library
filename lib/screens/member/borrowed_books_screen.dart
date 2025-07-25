@@ -11,6 +11,14 @@ class BorrowedBooksScreen extends StatefulWidget {
 }
 
 class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   final LibraryApiService _apiService = LibraryApiService();
 
   List<dynamic> _borrowings = [];
@@ -137,43 +145,52 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
   }
 
   List<dynamic> get _filteredBorrowings {
-    if (_filterStatus == 'semua') {
-      return _borrowings;
-    }
-
-    return _borrowings.where((borrowing) {
-      final status = borrowing['status'];
-      final tanggalKembali = _getActualReturnDate(borrowing);
-      final tanggalJatuhTempo = _getExpectedReturnDate(borrowing);
-      final now = DateTime.now();
-
-      // Check if book is returned (status "2" or "3", or has actual return date)
-      bool isReturned = (status == "2" || status == 2) ||
-          (status == "3" || status == 3) ||
-          (tanggalKembali != null);
-
-      switch (_filterStatus) {
-        case 'dipinjam':
-          return !isReturned && (status == "1" || status == 1);
-        case 'dikembalikan':
-          return isReturned;
-        case 'terlambat':
-          // Buku terlambat = dipinjam (status 1) dan sudah lewat tanggal jatuh tempo
-          if (isReturned)
-            return false; // Jika sudah dikembalikan, tidak terlambat
-          try {
-            if (tanggalJatuhTempo != null) {
-              final jatuhTempo = DateTime.parse(tanggalJatuhTempo);
-              return now.isAfter(jatuhTempo) && (status == "1" || status == 1);
+    List<dynamic> filtered = _borrowings;
+    // Filter by status
+    if (_filterStatus != 'semua') {
+      filtered = filtered.where((borrowing) {
+        final status = borrowing['status'];
+        final tanggalKembali = _getActualReturnDate(borrowing);
+        final tanggalJatuhTempo = _getExpectedReturnDate(borrowing);
+        final now = DateTime.now();
+        bool isReturned = (status == "2" || status == 2) ||
+            (status == "3" || status == 3) ||
+            (tanggalKembali != null);
+        switch (_filterStatus) {
+          case 'dipinjam':
+            return !isReturned && (status == "1" || status == 1);
+          case 'dikembalikan':
+            return isReturned;
+          case 'terlambat':
+            if (isReturned) return false;
+            try {
+              if (tanggalJatuhTempo != null) {
+                final jatuhTempo = DateTime.parse(tanggalJatuhTempo);
+                return now.isAfter(jatuhTempo) &&
+                    (status == "1" || status == 1);
+              }
+              return false;
+            } catch (e) {
+              return false;
             }
-            return false;
-          } catch (e) {
-            return false;
-          }
-        default:
-          return true;
-      }
-    }).toList();
+          default:
+            return true;
+        }
+      }).toList();
+    }
+    // Filter by search query (judul buku)
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((borrowing) {
+        final title = (borrowing['book']?['judul'] ??
+                borrowing['buku']?['judul'] ??
+                borrowing['judul'] ??
+                '')
+            .toString()
+            .toLowerCase();
+        return title.contains(_searchQuery.toLowerCase());
+      }).toList();
+    }
+    return filtered;
   }
 
   String _getStatusText(dynamic borrowing) {
@@ -351,6 +368,12 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
     dateController.text =
         _formatDate(selectedDate.toIso8601String().split('T')[0]);
 
+    // Ambil judul buku dari beberapa kemungkinan field
+    String bookTitle = borrowing['buku']?['judul'] ??
+        borrowing['book']?['judul'] ??
+        borrowing['judul'] ??
+        'Unknown';
+
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -361,7 +384,7 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Buku: ${borrowing['buku']?['judul'] ?? 'Unknown'}',
+                'Buku: $bookTitle',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -557,17 +580,69 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
       ),
       body: Column(
         children: [
-          // Filter Info
+          // Search and Filter Section
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            color: Colors.blue.shade50,
-            child: Text(
-              'Menampilkan: ${_getFilterText(_filterStatus)} (${filteredBorrowings.length} item)',
-              style: TextStyle(
-                color: Colors.blue.shade700,
-                fontWeight: FontWeight.w500,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade600,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
               ),
+            ),
+            child: Column(
+              children: [
+                // Search Bar
+                TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Cari judul buku...',
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Filter Info
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Menampilkan: ${_getFilterText(_filterStatus)} (${filteredBorrowings.length} item)',
+                    style: TextStyle(
+                      color: Colors.blue.shade700,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -619,7 +694,10 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
                                   ),
                                 ),
                                 title: Text(
-                                  borrowing['book']?['judul'] ?? 'Unknown Book',
+                                  borrowing['book']?['judul'] ??
+                                      borrowing['buku']?['judul'] ??
+                                      borrowing['judul'] ??
+                                      '-',
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold),
                                   maxLines: 2,
@@ -630,16 +708,13 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
                                   children: [
                                     Text(
                                         'Pinjam: ${_formatDate(borrowing['tanggal_peminjaman'])}'),
-                                    // PERBAIKAN: Tampilkan tanggal yang tepat berdasarkan status
                                     if (_getStatusText(borrowing) ==
                                         'Dikembalikan') ...[
-                                      // Untuk buku yang sudah dikembalikan, tampilkan tanggal jatuh tempo asli dan tanggal kembali
                                       Text(
                                           'Jatuh tempo: ${_formatDate(_getExpectedReturnDate(borrowing))}'),
                                       Text(
                                           'Tanggal kembali: ${_formatDate(_getActualReturnDate(borrowing))}'),
                                     ] else ...[
-                                      // Untuk buku yang masih dipinjam, tampilkan tanggal jatuh tempo
                                       Text(
                                           'Jatuh tempo: ${_formatDate(_getExpectedReturnDate(borrowing))}'),
                                     ]
@@ -684,30 +759,37 @@ class _BorrowedBooksScreenState extends State<BorrowedBooksScreen> {
                                               break;
                                           }
                                         },
-                                        itemBuilder: (context) => [
-                                          const PopupMenuItem(
-                                            value: 'detail',
-                                            child: Row(
-                                              children: [
-                                                Icon(Icons.info_outline),
-                                                SizedBox(width: 8),
-                                                Text('Detail'),
-                                              ],
-                                            ),
-                                          ),
-                                          if (borrowing['actual_return_date'] ==
-                                              null)
+                                        itemBuilder: (context) {
+                                          final isReturned = _getStatusText(
+                                                      borrowing) ==
+                                                  'Dikembalikan' ||
+                                              borrowing['actual_return_date'] !=
+                                                  null;
+                                          return [
                                             const PopupMenuItem(
-                                              value: 'return',
+                                              value: 'detail',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.assignment_return),
+                                                  Icon(Icons.info_outline),
                                                   SizedBox(width: 8),
-                                                  Text('Kembalikan'),
+                                                  Text('Detail'),
                                                 ],
                                               ),
                                             ),
-                                        ],
+                                            if (!isReturned)
+                                              const PopupMenuItem(
+                                                value: 'return',
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons
+                                                        .assignment_return),
+                                                    SizedBox(width: 8),
+                                                    Text('Kembalikan'),
+                                                  ],
+                                                ),
+                                              ),
+                                          ];
+                                        },
                                       ),
                                     ],
                                   ),

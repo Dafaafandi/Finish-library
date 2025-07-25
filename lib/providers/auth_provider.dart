@@ -37,9 +37,7 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
     }
   }
 
@@ -61,29 +59,29 @@ class AuthProvider with ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
 
-  Future<bool> register(Map<String, String> userData) async {
+  Future<Map<String, dynamic>> register(Map<String, String> userData) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final success = await _apiService.register(userData);
+      final result = await _apiService.register(userData);
       _isLoading = false;
       notifyListeners();
-      return success;
+      return result;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      if (kDebugMode) {
-
-      }
-      return false;
+      if (kDebugMode) {}
+      return {
+        'success': false,
+        'message': 'Terjadi kesalahan saat registrasi',
+        'data': null
+      };
     }
   }
 
@@ -96,9 +94,7 @@ class AuthProvider with ChangeNotifier {
       _userEmail = '';
       notifyListeners();
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
     }
   }
 
@@ -117,9 +113,7 @@ class AuthProvider with ChangeNotifier {
       // You could add an API call to verify the token here
       return true;
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
       return false;
     }
   }
@@ -135,9 +129,7 @@ class AuthProvider with ChangeNotifier {
       _userEmail = email;
       notifyListeners();
     } catch (e) {
-      if (kDebugMode) {
-
-      }
+      if (kDebugMode) {}
     }
   }
 }
